@@ -364,7 +364,6 @@ const ComponentPills = () => {
         my-10
         w-full
         overflow-hidden
-        bg-[#FFFEF7]
         py-14
       "
     >

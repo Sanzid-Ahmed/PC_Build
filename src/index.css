@@ -13,6 +13,7 @@
 
   /* Brand */
   --color-primary: #606C38;
+  /* --color-primary: #000000; */
   --color-primary-content: #FFFFFF;
 
   --color-secondary: #283618;
@@ -27,7 +28,8 @@
   --color-neutral-content: #FFFFFF;
 
   /* Background / Surfaces */
-  --color-base-100: #FFFEF7;
+  --color-base-100: #FFFFFF;
+  /* --color-base-100: #FFFEF7; */
   --color-base-200: #F7F5EA;
   --color-base-300: #E5E1D0;
   --color-base-content: #283618;
@@ -48,7 +50,8 @@
 
 /* Website Background */
 body {
-  background-color: #FFFEF7;
+  /* background-color: #f7f7f5; */
+  background-color: white;
 }
 
 /* Hide Swiper pagination */
