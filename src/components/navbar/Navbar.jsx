@@ -1,15 +1,57 @@
 import React from "react";
+import { Link, NavLink } from "react-router";
 
 const Navbar = () => {
-  return (
-    <div className="fixed top-0 left-0 w-full z-50 bg-base-100">
-      <div className="navbar xl:w-10/12 mx-auto">
 
-        {/* Navbar Start */}
+  // =========================
+  // All Navbar Links
+  // =========================
+
+  const links = [
+    {
+      name: "Home",
+      path: "/",
+    },
+    {
+      name: "Components",
+      path: "/components",
+    },
+    {
+      name: "Build PC",
+      path: "/build",
+    },
+    {
+      name: "Reviews",
+      path: "/reviews",
+    },
+  ];
+
+  // =========================
+  // NavLink Style
+  // =========================
+
+  const navLinkClass = ({ isActive }) =>
+    `transition-colors duration-300 ${
+      isActive
+        ? "bg-primary/10 text-primary font-bold"
+        : "text-secondary hover:bg-primary/10 hover:text-primary"
+    }`;
+
+  return (
+    <div className="fixed top-0 left-0 z-50 w-full border-b border-base-300 bg-base-100 shadow-sm">
+
+      <div className="navbar mx-auto xl:w-10/12">
+
+        {/* =========================
+            Navbar Start
+        ========================== */}
+
         <div className="navbar-start">
 
           {/* Mobile Menu */}
+
           <div className="dropdown">
+
             <div
               tabIndex={0}
               role="button"
@@ -32,130 +74,89 @@ const Navbar = () => {
               </svg>
             </div>
 
-            {/* Mobile Dropdown */}
+            {/* Mobile Links */}
+
             <ul
               tabIndex={-1}
-              className="menu menu-sm dropdown-content bg-base-100 text-secondary rounded-box z-50 mt-3 w-52 p-2 shadow-lg border border-base-300"
+              className="menu menu-sm dropdown-content z-50 mt-3 w-52 rounded-box border border-base-300 bg-base-100 p-2 text-secondary shadow-lg"
             >
-              <li>
-                <a className="hover:bg-primary/10 hover:text-primary">
-                  Home
-                </a>
-              </li>
 
-              <li>
-                <a className="hover:bg-primary/10 hover:text-primary">
-                  Components
-                </a>
+              {links.map((link) => (
+                <li key={link.path}>
+                  <NavLink
+                    to={link.path}
+                    className={navLinkClass}
+                  >
+                    {link.name}
+                  </NavLink>
+                </li>
+              ))}
 
-                <ul className="p-2">
-                  <li>
-                    <a className="hover:bg-primary/10 hover:text-primary">
-                      Products
-                    </a>
-                  </li>
-
-                  <li>
-                    <a className="hover:bg-primary/10 hover:text-primary">
-                      Build PC
-                    </a>
-                  </li>
-                </ul>
-              </li>
-
-              <li>
-                <a className="hover:bg-primary/10 hover:text-primary">
-                  Reviews
-                </a>
-              </li>
             </ul>
+
           </div>
 
           {/* Logo */}
-          <a className="btn btn-ghost text-xl font-bold text-secondary hover:bg-primary/10">
+
+          <Link
+            to="/"
+            className="btn btn-ghost text-xl font-bold text-secondary hover:bg-primary/10"
+          >
             PC Builder
-          </a>
+          </Link>
+
         </div>
 
-        {/* Desktop Menu */}
+        {/* =========================
+            Desktop Menu
+        ========================== */}
+
         <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1 text-secondary font-medium">
 
-            <li>
-              <a className="hover:bg-primary/10 hover:text-primary">
-                Home
-              </a>
-            </li>
+          <ul className="menu menu-horizontal px-1 font-medium">
 
-            <li>
-              <details>
-                <summary className="hover:bg-primary/10 hover:text-primary">
-                  Components
-                </summary>
-
-                <ul className="p-2 bg-base-100 text-secondary w-40 z-50 shadow-lg border border-base-300 rounded-box">
-                  <li>
-                    <a className="hover:bg-primary/10 hover:text-primary">
-                      CPU
-                    </a>
-                  </li>
-
-                  <li>
-                    <a className="hover:bg-primary/10 hover:text-primary">
-                      GPU
-                    </a>
-                  </li>
-
-                  <li>
-                    <a className="hover:bg-primary/10 hover:text-primary">
-                      RAM
-                    </a>
-                  </li>
-
-                  <li>
-                    <a className="hover:bg-primary/10 hover:text-primary">
-                      Storage
-                    </a>
-                  </li>
-                </ul>
-              </details>
-            </li>
-
-            <li>
-              <a className="hover:bg-primary/10 hover:text-primary">
-                Build PC
-              </a>
-            </li>
-
-            <li>
-              <a className="hover:bg-primary/10 hover:text-primary">
-                Reviews
-              </a>
-            </li>
+            {links.map((link) => (
+              <li key={link.path}>
+                <NavLink
+                  to={link.path}
+                  className={navLinkClass}
+                >
+                  {link.name}
+                </NavLink>
+              </li>
+            ))}
 
           </ul>
+
         </div>
 
-        {/* Navbar End */}
+        {/* =========================
+            Navbar End
+        ========================== */}
+
         <div className="navbar-end">
-          <a
+
+          <NavLink
+            to="/build"
             className="
               btn
-              bg-primary
-              hover:bg-secondary
-              text-white
               border-none
-              font-bold
+              bg-primary
               px-6
+              font-bold
+              text-white
               transition-colors
               duration-300
+              hover:bg-secondary
             "
           >
             Build Now
-          </a>
+          </NavLink>
+
         </div>
 
       </div>
+
     </div>
   );
 };
