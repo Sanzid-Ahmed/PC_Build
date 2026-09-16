@@ -18,7 +18,7 @@ const Navbar = () => {
     },
     {
       name: "Build PC",
-      path: "/build",
+      path: "/build-pc",
     },
     {
       name: "Reviews",
