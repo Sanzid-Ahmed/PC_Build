@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: light --default;
+}
+
+/* Custom DaisyUI Theme */
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
+
+  /* Brand */
+  --color-primary: #606C38;
+  --color-primary-content: #FFFFFF;
+
+  --color-secondary: #283618;
+  --color-secondary-content: #FFFFFF;
+
+  /* Accent */
+  --color-accent: #BC6C25;
+  --color-accent-content: #FFFFFF;
+
+  /* Neutral */
+  --color-neutral: #3F4A24;
+  --color-neutral-content: #FFFFFF;
+
+  /* Background / Surfaces */
+  --color-base-100: #FFFEF7;
+  --color-base-200: #F7F5EA;
+  --color-base-300: #E5E1D0;
+  --color-base-content: #283618;
+
+  /* Status Colors */
+  --color-info: #3B82F6;
+  --color-info-content: #FFFFFF;
+
+  --color-success: #527A3A;
+  --color-success-content: #FFFFFF;
+
+  --color-warning: #DDA15E;
+  --color-warning-content: #283618;
+
+  --color-error: #C44536;
+  --color-error-content: #FFFFFF;
+}
+
+/* Website Background */
+body {
+  background-color: #FFFEF7;
+}
+
+/* Hide Swiper pagination */
+.swiper-pagination {
+  display: none;
+}
