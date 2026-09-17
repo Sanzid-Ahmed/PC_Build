@@ -3,6 +3,7 @@ import RootLayout from "../layouts/RootLayout";
 import Home from "../pages/home/Home";
 import Components from "../pages/Components/Components";
 import BuildPC from "../pages/BuildPC/BuildPC";
+import AboutUs from "../pages/AboutUs/AboutUs";
 
 export const router = createBrowserRouter([
     {
@@ -14,12 +15,17 @@ export const router = createBrowserRouter([
                 Component: Home
             },
             {
-                path:"/components",
+                path:"components",
                 Component: Components
             },
             {
-                path:"/build-pc", 
+                path:"build-pc", 
                 Component: BuildPC 
+            },
+            {
+                path: "about-us",
+                Component: AboutUs,
+                loader: ()=> fetch('/warehouses.json').then(res => res.json())
             } 
         ]
     }

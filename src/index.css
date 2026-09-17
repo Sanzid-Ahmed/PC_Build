@@ -11,50 +11,66 @@
   name: "light";
   default: true;
 
-  /* Brand */
-  --color-primary: #cf0624;
-  /* --color-primary: #000000; */
+  /* =========================================
+     BRAND COLORS
+     ========================================= */
+
+  --color-primary: #E5092F;
   --color-primary-content: #FFFFFF;
 
-  --color-secondary: #283618;
+  --color-secondary: #0A0A0A;
   --color-secondary-content: #FFFFFF;
 
-  /* Accent */
-  --color-accent: #BC6C25;
+  --color-accent: #FF334F;
   --color-accent-content: #FFFFFF;
 
-  /* Neutral */
-  --color-neutral: #3F4A24;
+  /* =========================================
+     NEUTRAL
+     ========================================= */
+
+  --color-neutral: #151515;
   --color-neutral-content: #FFFFFF;
 
-  /* Background / Surfaces */
-  --color-base-100: #FFFFFF;
-  /* --color-base-100: #FFFEF7; */
-  --color-base-200: #F7F5EA;
-  --color-base-300: #E5E1D0;
-  --color-base-content: #283618;
+  /* =========================================
+     BACKGROUND / SURFACES
+     ========================================= */
 
-  /* Status Colors */
-  --color-info: #3B82F6;
+  --color-base-100: #FFFFFF;
+  --color-base-200: #F5F5F5;
+  --color-base-300: #E5E5E5;
+  --color-base-content: #0A0A0A;
+
+  /* =========================================
+     STATUS COLORS
+     ========================================= */
+
+  --color-info: #2563EB;
   --color-info-content: #FFFFFF;
 
-  --color-success: #527A3A;
+  --color-success: #16A34A;
   --color-success-content: #FFFFFF;
 
-  --color-warning: #DDA15E;
-  --color-warning-content: #283618;
+  --color-warning: #F59E0B;
+  --color-warning-content: #0A0A0A;
 
-  --color-error: #C44536;
+  --color-error: #DC2626;
   --color-error-content: #FFFFFF;
 }
 
-/* Website Background */
+/* =========================================
+   WEBSITE
+   ========================================= */
+
 body {
-  /* background-color: #f7f7f5; */
-  background-color: white;
+  background-color: #FFFFFF;
+  color: #0A0A0A;
+  font-family: "Urbanist", sans-serif;
 }
 
-/* Hide Swiper pagination */
+/* =========================================
+   SWIPER
+   ========================================= */
+
 .swiper-pagination {
   display: none;
 }

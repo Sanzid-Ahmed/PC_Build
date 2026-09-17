@@ -64,12 +64,11 @@ const BuildQuestions = ({
     "64GB",
   ];
 
+  // Only offer storage options that currently
+  // have realistic support in the database.
   const storageOptions = [
     "512GB SSD",
-    "1TB SSD",
     "1TB SSD + 1TB HDD",
-    "2TB SSD",
-    "2TB+ Storage",
   ];
 
   const canContinue = () => {
@@ -314,7 +313,7 @@ const BuildQuestions = ({
               </div>
             </div>
 
-            {/* Storage */}
+            {/* STORAGE */}
 
             <div>
               <label className="mb-3 block text-sm font-bold text-[#283618]">
@@ -322,34 +321,36 @@ const BuildQuestions = ({
               </label>
 
               <div className="grid gap-3">
-                {storageOptions.map(
-                  (storage) => {
-                    const selected =
-                      requirements.storage ===
-                      storage;
+                {storageOptions.map((storage) => {
+                  const selected =
+                    requirements.storage === storage;
 
-                    return (
-                      <button
-                        key={storage}
-                        type="button"
-                        onClick={() =>
-                          updateRequirement(
-                            "storage",
-                            storage
-                          )
-                        }
-                        className={`rounded-xl border p-4 text-left font-semibold transition-all ${
-                          selected
-                            ? "border-[#606C38] bg-[#F7F5EA] text-[#283618]"
-                            : "border-[#E5E1D0] text-[#6B705C] hover:border-[#BC6C25]"
-                        }`}
-                      >
-                        {storage}
-                      </button>
-                    );
-                  }
-                )}
+                  return (
+                    <button
+                      key={storage}
+                      type="button"
+                      onClick={() =>
+                        updateRequirement(
+                          "storage",
+                          storage
+                        )
+                      }
+                      className={`rounded-xl border p-4 text-left font-semibold transition-all ${
+                        selected
+                          ? "border-[#606C38] bg-[#F7F5EA] text-[#283618]"
+                          : "border-[#E5E1D0] text-[#6B705C] hover:border-[#BC6C25]"
+                      }`}
+                    >
+                      {storage}
+                    </button>
+                  );
+                })}
               </div>
+
+              <p className="mt-3 text-xs leading-5 text-[#8A877A]">
+                Storage options are based on products currently
+                available in our product database.
+              </p>
             </div>
           </div>
         </div>

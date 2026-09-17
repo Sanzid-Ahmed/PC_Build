@@ -5,7 +5,7 @@ import BuildHeader from "./BuildHeader/BuildHeader";
 import BuildQuestions from "./BuildQuestions/BuildQuestions";
 import BuildResult from "./BuildResult/BuildResult";
 
-const API_URL = "http://127.0.0.1:8000/api/build-pc";
+const API_URL = "https://pc-builder-api-eabc.onrender.com/api/build-pc";
 
 const BuildPC = () => {
   const [step, setStep] = useState(1);
