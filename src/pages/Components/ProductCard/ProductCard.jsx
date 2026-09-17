@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import {
   FaMicrochip,
   FaShoppingCart,
@@ -7,9 +6,12 @@ import {
   FaStore,
   FaExternalLinkAlt,
 } from "react-icons/fa";
+import { useCart } from "../../../hooks/useCart";
+
 
 const ProductCard = ({ product }) => {
   const [imageError, setImageError] = useState(false);
+  const { addToCart } = useCart();
 
   /* =====================================================
      PARSE IMAGES
@@ -26,9 +28,7 @@ const ProductCard = ({ product }) => {
   }
 
   const image =
-    Array.isArray(images) && images.length > 0
-      ? images[0]
-      : null;
+    Array.isArray(images) && images.length > 0 ? images[0] : null;
 
   /* =====================================================
      PRICE
@@ -41,8 +41,7 @@ const ProductCard = ({ product }) => {
   ===================================================== */
 
   const oldPrice =
-    product.old_price !== null &&
-    product.old_price !== undefined
+    product.old_price !== null && product.old_price !== undefined
       ? Number(product.old_price)
       : null;
 
@@ -51,15 +50,19 @@ const ProductCard = ({ product }) => {
   ===================================================== */
 
   const hasDiscount =
-    oldPrice !== null &&
-    oldPrice > 0 &&
-    oldPrice > price;
+    oldPrice !== null && oldPrice > 0 && oldPrice > price;
 
   const discount = hasDiscount
-    ? Math.round(
-        ((oldPrice - price) / oldPrice) * 100
-      )
+    ? Math.round(((oldPrice - price) / oldPrice) * 100)
     : 0;
+
+  /* =====================================================
+     ADD TO CART
+  ===================================================== */
+
+  const handleAddToCart = () => {
+    addToCart(product);
+  };
 
   return (
     <div
@@ -82,7 +85,6 @@ const ProductCard = ({ product }) => {
         hover:shadow-lg
       "
     >
-
       {/* ================= IMAGE ================= */}
 
       <div
@@ -100,7 +102,6 @@ const ProductCard = ({ product }) => {
           sm:p-5
         "
       >
-
         {/* DISCOUNT */}
 
         {hasDiscount && (
@@ -125,7 +126,6 @@ const ProductCard = ({ product }) => {
             -{discount}%
           </div>
         )}
-
 
         {/* CATEGORY */}
 
@@ -155,7 +155,6 @@ const ProductCard = ({ product }) => {
             {product.category}
           </div>
         )}
-
 
         {/* PRODUCT IMAGE */}
 
@@ -195,9 +194,7 @@ const ProductCard = ({ product }) => {
             <FaMicrochip className="text-3xl sm:text-4xl" />
           </div>
         )}
-
       </div>
-
 
       {/* ================= INFORMATION ================= */}
 
@@ -211,7 +208,6 @@ const ProductCard = ({ product }) => {
           sm:p-5
         "
       >
-
         {/* ================= STORE ================= */}
 
         <div
@@ -233,7 +229,6 @@ const ProductCard = ({ product }) => {
           </span>
         </div>
 
-
         {/* ================= NAME ================= */}
 
         <h3
@@ -253,7 +248,6 @@ const ProductCard = ({ product }) => {
           {product.name}
         </h3>
 
-
         {/* ================= BRAND ================= */}
 
         {product.brand && (
@@ -272,12 +266,10 @@ const ProductCard = ({ product }) => {
           </p>
         )}
 
-
         {/* ================= RATING ================= */}
 
         {product.rating && (
           <div className="mt-3 flex items-center gap-1 text-sm">
-
             <FaStar className="text-warning" />
 
             <span className="font-semibold text-base-content">
@@ -287,17 +279,13 @@ const ProductCard = ({ product }) => {
             <span className="text-xs text-base-content/50">
               ({product.reviews || 0})
             </span>
-
           </div>
         )}
-
 
         {/* ================= PRICE ================= */}
 
         <div className="mt-auto pt-5">
-
           <div className="flex min-w-0 flex-wrap items-end gap-2">
-
             <span
               className="
                 truncate
@@ -324,9 +312,7 @@ const ProductCard = ({ product }) => {
                 ৳ {oldPrice.toLocaleString()}
               </span>
             )}
-
           </div>
-
 
           {/* ================= BUTTONS ================= */}
 
@@ -338,7 +324,6 @@ const ProductCard = ({ product }) => {
               gap-2
             "
           >
-
             {/* VIEW DETAILS */}
 
             {product.url ? (
@@ -373,7 +358,11 @@ const ProductCard = ({ product }) => {
                 </span>
 
                 <FaExternalLinkAlt
-                  className="shrink-0 text-[9px] sm:text-xs"
+                  className="
+                    shrink-0
+                    text-[9px]
+                    sm:text-xs
+                  "
                 />
               </a>
             ) : (
@@ -396,12 +385,12 @@ const ProductCard = ({ product }) => {
               </button>
             )}
 
-
             {/* ADD TO CART */}
 
             <button
               type="button"
               title="Add to cart"
+              onClick={handleAddToCart}
               className="
                 flex
                 h-11
@@ -419,17 +408,15 @@ const ProductCard = ({ product }) => {
                 hover:bg-primary
                 hover:text-primary-content
                 hover:shadow-md
+                active:scale-95
                 sm:h-12
                 sm:w-12
               "
             >
               <FaShoppingCart />
             </button>
-
           </div>
-
         </div>
-
       </div>
     </div>
   );

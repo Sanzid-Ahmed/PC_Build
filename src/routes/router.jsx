@@ -8,6 +8,7 @@ import AuthLayout from "../layouts/AuthLayout";
 import Login from "../pages/Auth/Login/Login";
 import Register from "../pages/Auth/Register/Register";
 import PrivateRoute from "./PrivateRoute";
+import Cart from "../pages/Cart/Cart";
 
 export const router = createBrowserRouter([
     {
@@ -30,7 +31,11 @@ export const router = createBrowserRouter([
                 path: "about-us",
                 Component: AboutUs,
                 loader: ()=> fetch('/warehouses.json').then(res => res.json())
-            } 
+            },
+            {
+                path:"cart",
+                element: <Cart />
+            }
         ]
     },
     {

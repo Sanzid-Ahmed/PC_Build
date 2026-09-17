@@ -1,13 +1,17 @@
 import React from "react";
-
 import { Link, NavLink } from "react-router";
+import { FaShoppingCart } from "react-icons/fa";
 
 import useAuth from "../../hooks/useAuth";
-
 import Logo from "../logo/Logo";
+import { useCart } from "../../hooks/useCart";
 
 const Navbar = () => {
   const { user, logOut } = useAuth();
+
+  // IMPORTANT:
+  // CartProvider provides "cartItemCount"
+  const { cartItemCount } = useCart();
 
   const handleLogOut = () => {
     logOut()
@@ -18,8 +22,9 @@ const Navbar = () => {
   };
 
   // =========================
-  // All Navbar Links
+  // ALL NAVBAR LINKS
   // =========================
+
   const links = [
     {
       name: "Home",
@@ -40,8 +45,9 @@ const Navbar = () => {
   ];
 
   // =========================
-  // Desktop NavLink Style
+  // DESKTOP NAVLINK STYLE
   // =========================
+
   const navLinkClass = ({ isActive }) =>
     `relative rounded-lg px-4 py-2 text-sm font-semibold
     transition-all duration-300
@@ -52,8 +58,9 @@ const Navbar = () => {
     }`;
 
   // =========================
-  // Mobile NavLink Style
+  // MOBILE NAVLINK STYLE
   // =========================
+
   const mobileNavLinkClass = ({ isActive }) =>
     `rounded-lg px-4 py-3 text-sm font-semibold
     transition-all duration-300
@@ -91,13 +98,15 @@ const Navbar = () => {
         "
       >
         {/* =========================
-            Navbar Start
+            NAVBAR START
         ========================== */}
 
         <div className="navbar-start">
 
-          {/* Mobile Menu */}
+          {/* MOBILE MENU */}
+
           <div className="dropdown">
+
             <div
               tabIndex={0}
               role="button"
@@ -128,7 +137,8 @@ const Navbar = () => {
               </svg>
             </div>
 
-            {/* Mobile Dropdown */}
+            {/* MOBILE DROPDOWN */}
+
             <ul
               tabIndex={-1}
               className="
@@ -156,15 +166,54 @@ const Navbar = () => {
                   </NavLink>
                 </li>
               ))}
+
+              {/* MOBILE CART */}
+
+              <li className="mt-1 border-t border-secondary-content/10 pt-1">
+                <NavLink
+                  to="/cart"
+                  className={mobileNavLinkClass}
+                >
+                  <span className="flex items-center gap-3">
+                    <FaShoppingCart />
+
+                    <span>Cart</span>
+
+                    {cartItemCount > 0 && (
+                      <span
+                        className="
+                          ml-auto
+                          flex
+                          min-w-6
+                          items-center
+                          justify-center
+                          rounded-full
+                          bg-primary
+                          px-1.5
+                          py-0.5
+                          text-[10px]
+                          font-extrabold
+                          text-primary-content
+                        "
+                      >
+                        {cartItemCount > 99
+                          ? "99+"
+                          : cartItemCount}
+                      </span>
+                    )}
+                  </span>
+                </NavLink>
+              </li>
             </ul>
           </div>
 
-          {/* Logo */}
+          {/* LOGO */}
+
           <Logo />
         </div>
 
         {/* =========================
-            Desktop Menu
+            DESKTOP MENU
         ========================== */}
 
         <div className="navbar-center hidden lg:flex">
@@ -183,58 +232,163 @@ const Navbar = () => {
         </div>
 
         {/* =========================
-            Navbar End
+            NAVBAR END
         ========================== */}
 
         <div className="navbar-end">
-          {user ? (
-            <div className="flex items-center gap-2 sm:gap-3">
 
-              {/* Profile Image */}
-              <div
-                className="
-                  h-10
-                  w-10
-                  overflow-hidden
-                  rounded-full
-                  border-2
-                  border-primary
-                  bg-base-200
-                  shadow-md
-                "
-                title={user.displayName || user.email}
-              >
-                {user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName || "User profile"}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div
-                    className="
-                      flex
-                      h-full
-                      w-full
-                      items-center
-                      justify-center
-                      bg-primary
-                      text-sm
-                      font-bold
-                      text-primary-content
-                    "
-                  >
-                    {(user.displayName || user.email || "U")
-                      .charAt(0)
-                      .toUpperCase()}
-                  </div>
-                )}
-              </div>
+          <div className="flex items-center gap-2 sm:gap-3">
 
-              {/* Logout */}
-              <button
-                type="button"
-                onClick={handleLogOut}
+            {/* =========================
+                CART BUTTON
+            ========================== */}
+
+            <Link
+              to="/cart"
+              title="Shopping Cart"
+              aria-label={`Shopping Cart${
+                cartItemCount > 0
+                  ? `, ${cartItemCount} items`
+                  : ""
+              }`}
+              className="
+                relative
+                flex
+                h-10
+                w-10
+                items-center
+                justify-center
+                rounded-xl
+                border
+                border-secondary-content/10
+                bg-secondary
+                text-secondary-content
+                transition-all
+                duration-300
+                hover:border-primary
+                hover:bg-primary
+                hover:text-primary-content
+                hover:shadow-md
+                active:scale-95
+                sm:h-11
+                sm:w-11
+              "
+            >
+              <FaShoppingCart className="text-base sm:text-lg" />
+
+              {/* CART COUNT */}
+
+              {cartItemCount > 0 && (
+                <span
+                  className="
+                    absolute
+                    -right-1.5
+                    -top-1.5
+                    flex
+                    min-h-5
+                    min-w-5
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-primary
+                    px-1
+                    text-[10px]
+                    font-extrabold
+                    leading-none
+                    text-primary-content
+                    shadow-md
+                    ring-2
+                    ring-secondary
+                  "
+                >
+                  {cartItemCount > 99
+                    ? "99+"
+                    : cartItemCount}
+                </span>
+              )}
+            </Link>
+
+            {/* =========================
+                USER
+            ========================== */}
+
+            {user ? (
+              <>
+                {/* PROFILE IMAGE */}
+
+                <div
+                  className="
+                    h-10
+                    w-10
+                    overflow-hidden
+                    rounded-full
+                    border-2
+                    border-primary
+                    bg-base-200
+                    shadow-md
+                    sm:h-11
+                    sm:w-11
+                  "
+                  title={user.displayName || user.email}
+                >
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt={
+                        user.displayName ||
+                        "User profile"
+                      }
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="
+                        flex
+                        h-full
+                        w-full
+                        items-center
+                        justify-center
+                        bg-primary
+                        text-sm
+                        font-bold
+                        text-primary-content
+                      "
+                    >
+                      {(
+                        user.displayName ||
+                        user.email ||
+                        "U"
+                      )
+                        .charAt(0)
+                        .toUpperCase()}
+                    </div>
+                  )}
+                </div>
+
+                {/* LOGOUT */}
+
+                <button
+                  type="button"
+                  onClick={handleLogOut}
+                  className="
+                    btn
+                    border-none
+                    bg-primary
+                    text-primary-content
+                    transition-all
+                    duration-300
+                    hover:bg-accent
+                    hover:shadow-md
+                  "
+                >
+                  Log Out
+                </button>
+              </>
+            ) : (
+              /* LOGIN */
+
+              <Link
+                to="/login"
                 className="
                   btn
                   border-none
@@ -246,27 +400,10 @@ const Navbar = () => {
                   hover:shadow-md
                 "
               >
-                Log Out
-              </button>
-
-            </div>
-          ) : (
-            <Link
-              to="/login"
-              className="
-                btn
-                border-none
-                bg-primary
-                text-primary-content
-                transition-all
-                duration-300
-                hover:bg-accent
-                hover:shadow-md
-              "
-            >
-              Login
-            </Link>
-          )}
+                Login
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </div>
