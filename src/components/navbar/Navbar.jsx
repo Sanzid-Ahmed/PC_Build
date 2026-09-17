@@ -1,7 +1,22 @@
 import React from "react";
+
 import { Link, NavLink } from "react-router";
 
+import useAuth from "../../hooks/useAuth";
+
+import Logo from "../logo/Logo";
+
 const Navbar = () => {
+  const { user, logOut } = useAuth();
+
+  const handleLogOut = () => {
+    logOut()
+      .then()
+      .catch((error) => {
+        console.error("Logout failed:", error);
+      });
+  };
+
   // =========================
   // All Navbar Links
   // =========================
@@ -33,7 +48,7 @@ const Navbar = () => {
     ${
       isActive
         ? "bg-primary text-primary-content shadow-md"
-        : "text-white hover:bg-white/10 hover:text-primary"
+        : "text-secondary-content hover:bg-secondary-content/10 hover:text-primary"
     }`;
 
   // =========================
@@ -44,8 +59,8 @@ const Navbar = () => {
     transition-all duration-300
     ${
       isActive
-        ? "bg-primary text-white shadow-md"
-        : "text-white hover:bg-white/10 hover:text-primary"
+        ? "bg-primary text-primary-content shadow-md"
+        : "text-secondary-content hover:bg-secondary-content/10 hover:text-primary"
     }`;
 
   return (
@@ -54,11 +69,11 @@ const Navbar = () => {
         fixed
         left-1/2
         top-0
-        z-50
+        z-55
         w-full
         -translate-x-1/2
         border-b
-        border-white/10
+        border-secondary-content/10
         bg-secondary
         shadow-lg
         backdrop-blur-md
@@ -75,15 +90,14 @@ const Navbar = () => {
           xl:px-6
         "
       >
-
         {/* =========================
             Navbar Start
         ========================== */}
+
         <div className="navbar-start">
 
           {/* Mobile Menu */}
           <div className="dropdown">
-
             <div
               tabIndex={0}
               role="button"
@@ -91,8 +105,8 @@ const Navbar = () => {
                 btn
                 btn-ghost
                 mr-1
-                text-white
-                hover:bg-white/10
+                text-secondary-content
+                hover:bg-secondary-content/10
                 hover:text-primary
                 lg:hidden
               "
@@ -126,7 +140,7 @@ const Navbar = () => {
                 w-56
                 rounded-xl
                 border
-                border-white/10
+                border-secondary-content/10
                 bg-secondary
                 p-2
                 shadow-2xl
@@ -146,50 +160,13 @@ const Navbar = () => {
           </div>
 
           {/* Logo */}
-          <Link
-            to="/"
-            className="
-              group
-              flex
-              items-center
-              gap-2
-              px-2
-              text-xl
-              font-extrabold
-              tracking-tight
-            "
-          >
-            <span
-              className="
-                flex
-                h-9
-                w-9
-                items-center
-                justify-center
-                rounded-lg
-                bg-primary
-                text-sm
-                font-black
-                text-primary-content
-                shadow-md
-                transition-all
-                duration-300
-                group-hover:scale-105
-                group-hover:shadow-primary/30
-              "
-            >
-              PC
-            </span>
-
-            <span className="text-white">
-              PC<span className="text-primary">Builder</span>
-            </span>
-          </Link>
+          <Logo />
         </div>
 
         {/* =========================
             Desktop Menu
         ========================== */}
+
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal items-center gap-1 px-1">
             {links.map((link) => (
@@ -208,31 +185,89 @@ const Navbar = () => {
         {/* =========================
             Navbar End
         ========================== */}
-        <div className="navbar-end">
-          <NavLink
-            to="/build"
-            className="
-              btn
-              rounded-lg
-              border-none
-              bg-primary
-              px-5
-              font-bold
-              text-primary-content
-              shadow-md
-              transition-all
-              duration-300
-              hover:-translate-y-0.5
-              hover:bg-white
-              hover:text-secondary
-              hover:shadow-lg
-              sm:px-6
-            "
-          >
-            Build Now
-          </NavLink>
-        </div>
 
+        <div className="navbar-end">
+          {user ? (
+            <div className="flex items-center gap-2 sm:gap-3">
+
+              {/* Profile Image */}
+              <div
+                className="
+                  h-10
+                  w-10
+                  overflow-hidden
+                  rounded-full
+                  border-2
+                  border-primary
+                  bg-base-200
+                  shadow-md
+                "
+                title={user.displayName || user.email}
+              >
+                {user.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt={user.displayName || "User profile"}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div
+                    className="
+                      flex
+                      h-full
+                      w-full
+                      items-center
+                      justify-center
+                      bg-primary
+                      text-sm
+                      font-bold
+                      text-primary-content
+                    "
+                  >
+                    {(user.displayName || user.email || "U")
+                      .charAt(0)
+                      .toUpperCase()}
+                  </div>
+                )}
+              </div>
+
+              {/* Logout */}
+              <button
+                type="button"
+                onClick={handleLogOut}
+                className="
+                  btn
+                  border-none
+                  bg-primary
+                  text-primary-content
+                  transition-all
+                  duration-300
+                  hover:bg-accent
+                  hover:shadow-md
+                "
+              >
+                Log Out
+              </button>
+
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="
+                btn
+                border-none
+                bg-primary
+                text-primary-content
+                transition-all
+                duration-300
+                hover:bg-accent
+                hover:shadow-md
+              "
+            >
+              Login
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );
