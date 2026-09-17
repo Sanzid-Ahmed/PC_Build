@@ -29,14 +29,19 @@ const useBuildProducts = () => {
         const data = response.data.data;
 
         if (!Array.isArray(data)) {
-          throw new Error("Product data is not an array");
+          throw new Error(
+            "Product data is not an array"
+          );
         }
 
         if (!cancelled) {
           setProducts(data);
         }
       } catch (err) {
-        console.error("Build PC product error:", err);
+        console.error(
+          "Build PC product error:",
+          err
+        );
 
         if (!cancelled) {
           setError(
@@ -62,13 +67,19 @@ const useBuildProducts = () => {
   const productsByCategory = useMemo(() => {
     const result = {};
 
-    Object.keys(categoryMap).forEach((builderCategory) => {
-      const apiCategories = categoryMap[builderCategory];
+    Object.keys(categoryMap).forEach(
+      (builderCategory) => {
+        const apiCategories =
+          categoryMap[builderCategory];
 
-      result[builderCategory] = products.filter((product) =>
-        apiCategories.includes(product.category)
-      );
-    });
+        result[builderCategory] =
+          products.filter((product) =>
+            apiCategories.includes(
+              product.category
+            )
+          );
+      }
+    );
 
     return result;
   }, [products]);

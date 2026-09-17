@@ -95,8 +95,21 @@ const BuildQuestions = ({
   };
 
   return (
-    <div className="mx-auto max-w-5xl rounded-3xl border border-[#E5E1D0] bg-white p-5 shadow-[0_10px_40px_rgba(40,54,24,0.06)] sm:p-8 md:p-10">
-
+    <div
+      className="
+        mx-auto
+        max-w-5xl
+        rounded-3xl
+        border
+        border-base-300
+        bg-base-100
+        p-5
+        shadow-lg
+        shadow-base-content/5
+        sm:p-8
+        md:p-10
+      "
+    >
       {/* ======================================
           STEP 1
       ====================================== */}
@@ -126,31 +139,31 @@ const BuildQuestions = ({
                   }
                   className={`rounded-2xl border p-5 text-left transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
                     selected
-                      ? "border-[#606C38] bg-[#F7F5EA] ring-2 ring-[#606C38]/20"
-                      : "border-[#E5E1D0] bg-white hover:border-[#BC6C25]"
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                      : "border-base-300 bg-base-100 hover:border-primary"
                   }`}
                 >
                   <div className="text-3xl">
                     {item.emoji}
                   </div>
 
-                  <h3 className="mt-4 font-bold text-[#283618]">
+                  <h3 className="mt-4 font-bold text-base-content">
                     {item.value}
                   </h3>
 
-                  <p className="mt-2 text-sm leading-5 text-[#6B705C]">
+                  <p className="mt-2 text-sm leading-5 text-base-content/60">
                     {item.description}
                   </p>
 
                   <div
                     className={`mt-4 h-5 w-5 rounded-full border-2 ${
                       selected
-                        ? "border-[#606C38] bg-[#606C38]"
-                        : "border-[#D5D1C0]"
+                        ? "border-primary bg-primary"
+                        : "border-base-300"
                     }`}
                   >
                     {selected && (
-                      <div className="m-1 h-2.5 w-2.5 rounded-full bg-white" />
+                      <div className="m-1 h-2.5 w-2.5 rounded-full bg-primary-content" />
                     )}
                   </div>
                 </button>
@@ -189,15 +202,15 @@ const BuildQuestions = ({
                   }
                   className={`rounded-2xl border p-6 text-left transition-all ${
                     selected
-                      ? "border-[#606C38] bg-[#F7F5EA] ring-2 ring-[#606C38]/20"
-                      : "border-[#E5E1D0] hover:border-[#BC6C25] hover:shadow-md"
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                      : "border-base-300 bg-base-100 hover:border-primary hover:shadow-md"
                   }`}
                 >
-                  <p className="text-sm font-medium text-[#6B705C]">
+                  <p className="text-sm font-medium text-base-content/60">
                     Estimated budget
                   </p>
 
-                  <h3 className="mt-2 text-xl font-bold text-[#283618]">
+                  <h3 className="mt-2 text-xl font-bold text-base-content">
                     {budget}
                   </h3>
                 </button>
@@ -236,24 +249,24 @@ const BuildQuestions = ({
                   }
                   className={`rounded-2xl border p-5 text-left transition-all ${
                     selected
-                      ? "border-[#606C38] bg-[#F7F5EA] ring-2 ring-[#606C38]/20"
-                      : "border-[#E5E1D0] hover:border-[#BC6C25] hover:shadow-md"
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                      : "border-base-300 bg-base-100 hover:border-primary hover:shadow-md"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-[#283618]">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="font-bold text-base-content">
                       {priority}
                     </span>
 
                     <span
-                      className={`h-5 w-5 rounded-full border-2 ${
+                      className={`h-5 w-5 shrink-0 rounded-full border-2 ${
                         selected
-                          ? "border-[#606C38] bg-[#606C38]"
-                          : "border-[#D5D1C0]"
+                          ? "border-primary bg-primary"
+                          : "border-base-300"
                       }`}
                     >
                       {selected && (
-                        <span className="m-1 block h-2.5 w-2.5 rounded-full bg-white" />
+                        <span className="m-1 block h-2.5 w-2.5 rounded-full bg-primary-content" />
                       )}
                     </span>
                   </div>
@@ -277,11 +290,10 @@ const BuildQuestions = ({
           />
 
           <div className="grid gap-8 md:grid-cols-2">
-
             {/* RAM */}
 
             <div>
-              <label className="mb-3 block text-sm font-bold text-[#283618]">
+              <label className="mb-3 block text-sm font-bold text-base-content">
                 Preferred RAM
               </label>
 
@@ -302,8 +314,8 @@ const BuildQuestions = ({
                       }
                       className={`rounded-xl border p-4 font-semibold transition-all ${
                         selected
-                          ? "border-[#606C38] bg-[#F7F5EA] text-[#283618]"
-                          : "border-[#E5E1D0] text-[#6B705C] hover:border-[#BC6C25]"
+                          ? "border-primary bg-primary/5 text-base-content ring-1 ring-primary/20"
+                          : "border-base-300 bg-base-100 text-base-content/60 hover:border-primary hover:text-base-content"
                       }`}
                     >
                       {ram}
@@ -316,7 +328,7 @@ const BuildQuestions = ({
             {/* STORAGE */}
 
             <div>
-              <label className="mb-3 block text-sm font-bold text-[#283618]">
+              <label className="mb-3 block text-sm font-bold text-base-content">
                 Preferred Storage
               </label>
 
@@ -337,8 +349,8 @@ const BuildQuestions = ({
                       }
                       className={`rounded-xl border p-4 text-left font-semibold transition-all ${
                         selected
-                          ? "border-[#606C38] bg-[#F7F5EA] text-[#283618]"
-                          : "border-[#E5E1D0] text-[#6B705C] hover:border-[#BC6C25]"
+                          ? "border-primary bg-primary/5 text-base-content ring-1 ring-primary/20"
+                          : "border-base-300 bg-base-100 text-base-content/60 hover:border-primary hover:text-base-content"
                       }`}
                     >
                       {storage}
@@ -347,9 +359,9 @@ const BuildQuestions = ({
                 })}
               </div>
 
-              <p className="mt-3 text-xs leading-5 text-[#8A877A]">
-                Storage options are based on products currently
-                available in our product database.
+              <p className="mt-3 text-xs leading-5 text-base-content/50">
+                Storage options are based on products
+                currently available in our product database.
               </p>
             </div>
           </div>
@@ -360,8 +372,20 @@ const BuildQuestions = ({
           NAVIGATION
       ====================================== */}
 
-      <div className="mt-10 flex flex-col-reverse gap-3 border-t border-[#E5E1D0] pt-6 sm:flex-row sm:items-center sm:justify-between">
-
+      <div
+        className="
+          mt-10
+          flex
+          flex-col-reverse
+          gap-3
+          border-t
+          border-base-300
+          pt-6
+          sm:flex-row
+          sm:items-center
+          sm:justify-between
+        "
+      >
         {/* Back */}
 
         <button
@@ -370,8 +394,8 @@ const BuildQuestions = ({
           disabled={step === 1}
           className={`rounded-xl px-6 py-3 font-semibold transition ${
             step === 1
-              ? "cursor-not-allowed text-[#B5B2A4]"
-              : "text-[#6B705C] hover:bg-[#F7F5EA] hover:text-[#283618]"
+              ? "cursor-not-allowed text-base-content/30"
+              : "text-base-content/60 hover:bg-base-200 hover:text-base-content"
           }`}
         >
           ← Back
@@ -386,8 +410,8 @@ const BuildQuestions = ({
             disabled={!canContinue()}
             className={`rounded-xl px-8 py-3 font-bold transition ${
               canContinue()
-                ? "bg-[#606C38] text-white shadow-md hover:bg-[#4F5A2E]"
-                : "cursor-not-allowed bg-[#E5E1D0] text-[#9A978B]"
+                ? "bg-primary text-primary-content shadow-md shadow-primary/20 hover:bg-accent"
+                : "cursor-not-allowed bg-base-300 text-base-content/40"
             }`}
           >
             Continue →
@@ -399,8 +423,8 @@ const BuildQuestions = ({
             disabled={!canContinue()}
             className={`rounded-xl px-8 py-3 font-bold transition ${
               canContinue()
-                ? "bg-[#BC6C25] text-white shadow-md hover:bg-[#A75E20]"
-                : "cursor-not-allowed bg-[#E5E1D0] text-[#9A978B]"
+                ? "bg-primary text-primary-content shadow-md shadow-primary/20 hover:bg-accent"
+                : "cursor-not-allowed bg-base-300 text-base-content/40"
             }`}
           >
             Generate My PC ✨
@@ -411,10 +435,9 @@ const BuildQuestions = ({
   );
 };
 
-
-// ==========================================
-// Question Title
-// ==========================================
+/* ==========================================
+   Question Title
+========================================== */
 
 const QuestionTitle = ({
   number,
@@ -423,15 +446,15 @@ const QuestionTitle = ({
 }) => {
   return (
     <div className="mb-8">
-      <span className="text-sm font-black tracking-widest text-[#BC6C25]">
+      <span className="text-sm font-black tracking-widest text-primary">
         {number}
       </span>
 
-      <h2 className="mt-2 text-2xl font-black text-[#283618] sm:text-3xl">
+      <h2 className="mt-2 text-2xl font-black text-base-content sm:text-3xl">
         {title}
       </h2>
 
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6B705C] sm:text-base">
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-base-content/60 sm:text-base">
         {description}
       </p>
     </div>

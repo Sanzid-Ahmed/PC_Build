@@ -1,365 +1,464 @@
 import React from "react";
 
-const BuildResult = ({ buildData, requirements, buildAgain }) => {
-  if (!buildData || !buildData.products) {
-    return (
-      <div className="mx-auto max-w-5xl rounded-3xl border border-[#E5E1D0] bg-white p-10 text-center shadow-[0_10px_40px_rgba(40,54,24,0.06)]">
-        <h2 className="text-2xl font-black text-[#283618]">
-          No Build Found
-        </h2>
+const BuildQuestions = ({
+  step,
+  requirements,
+  updateRequirement,
+  nextStep,
+  previousStep,
+  generateBuild,
+}) => {
+  const types = [
+    {
+      value: "Gaming",
+      emoji: "🎮",
+      description:
+        "Gaming, FPS, AAA games and high performance",
+    },
+    {
+      value: "Professional",
+      emoji: "💼",
+      description:
+        "Office, programming, business and productivity",
+    },
+    {
+      value: "AI & ML",
+      emoji: "🤖",
+      description:
+        "AI development, machine learning and data science",
+    },
+    {
+      value: "Content Creation",
+      emoji: "🎬",
+      description:
+        "Video editing, rendering and creative work",
+    },
+    {
+      value: "General",
+      emoji: "🖥️",
+      description:
+        "Everyday use, browsing, study and entertainment",
+    },
+  ];
 
-        <p className="mt-2 text-[#6B705C]">
-          We could not generate a PC configuration.
-        </p>
+  const budgets = [
+    "৳50,000 - ৳70,000",
+    "৳70,000 - ৳100,000",
+    "৳100,000 - ৳150,000",
+    "৳150,000 - ৳200,000",
+    "৳200,000+",
+  ];
+
+  const priorities = [
+    "Maximum Performance",
+    "Best Value for Money",
+    "Future Upgradeability",
+    "Low Power Consumption",
+    "Balanced Build",
+  ];
+
+  const ramOptions = [
+    "8GB",
+    "16GB",
+    "32GB",
+    "64GB",
+  ];
+
+  // Only offer storage options that currently
+  // have realistic support in the database.
+  const storageOptions = [
+    "512GB SSD",
+    "1TB SSD + 1TB HDD",
+  ];
+
+  const canContinue = () => {
+    if (step === 1) {
+      return requirements.type !== "";
+    }
+
+    if (step === 2) {
+      return requirements.budget !== "";
+    }
+
+    if (step === 3) {
+      return requirements.priority !== "";
+    }
+
+    if (step === 4) {
+      return (
+        requirements.ram !== "" &&
+        requirements.storage !== ""
+      );
+    }
+
+    return true;
+  };
+
+  return (
+    <div
+      className="
+        mx-auto
+        max-w-5xl
+        rounded-3xl
+        border
+        border-base-300
+        bg-base-100
+        p-5
+        shadow-lg
+        shadow-base-content/5
+        sm:p-8
+        md:p-10
+      "
+    >
+      {/* ======================================
+          STEP 1
+      ====================================== */}
+
+      {step === 1 && (
+        <div>
+          <QuestionTitle
+            number="01"
+            title="What type of PC do you want?"
+            description="Choose what you mainly want to use your computer for."
+          />
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {types.map((item) => {
+              const selected =
+                requirements.type === item.value;
+
+              return (
+                <button
+                  key={item.value}
+                  type="button"
+                  onClick={() =>
+                    updateRequirement(
+                      "type",
+                      item.value
+                    )
+                  }
+                  className={`rounded-2xl border p-5 text-left transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
+                    selected
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                      : "border-base-300 bg-base-100 hover:border-primary"
+                  }`}
+                >
+                  <div className="text-3xl">
+                    {item.emoji}
+                  </div>
+
+                  <h3 className="mt-4 font-bold text-base-content">
+                    {item.value}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-5 text-base-content/60">
+                    {item.description}
+                  </p>
+
+                  <div
+                    className={`mt-4 h-5 w-5 rounded-full border-2 ${
+                      selected
+                        ? "border-primary bg-primary"
+                        : "border-base-300"
+                    }`}
+                  >
+                    {selected && (
+                      <div className="m-1 h-2.5 w-2.5 rounded-full bg-primary-content" />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ======================================
+          STEP 2
+      ====================================== */}
+
+      {step === 2 && (
+        <div>
+          <QuestionTitle
+            number="02"
+            title="What's your budget?"
+            description="We'll use your budget to find the best combination of components."
+          />
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {budgets.map((budget) => {
+              const selected =
+                requirements.budget === budget;
+
+              return (
+                <button
+                  key={budget}
+                  type="button"
+                  onClick={() =>
+                    updateRequirement(
+                      "budget",
+                      budget
+                    )
+                  }
+                  className={`rounded-2xl border p-6 text-left transition-all ${
+                    selected
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                      : "border-base-300 bg-base-100 hover:border-primary hover:shadow-md"
+                  }`}
+                >
+                  <p className="text-sm font-medium text-base-content/60">
+                    Estimated budget
+                  </p>
+
+                  <h3 className="mt-2 text-xl font-bold text-base-content">
+                    {budget}
+                  </h3>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ======================================
+          STEP 3
+      ====================================== */}
+
+      {step === 3 && (
+        <div>
+          <QuestionTitle
+            number="03"
+            title="What's most important to you?"
+            description="Tell us what the build should prioritize."
+          />
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {priorities.map((priority) => {
+              const selected =
+                requirements.priority === priority;
+
+              return (
+                <button
+                  key={priority}
+                  type="button"
+                  onClick={() =>
+                    updateRequirement(
+                      "priority",
+                      priority
+                    )
+                  }
+                  className={`rounded-2xl border p-5 text-left transition-all ${
+                    selected
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                      : "border-base-300 bg-base-100 hover:border-primary hover:shadow-md"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="font-bold text-base-content">
+                      {priority}
+                    </span>
+
+                    <span
+                      className={`h-5 w-5 shrink-0 rounded-full border-2 ${
+                        selected
+                          ? "border-primary bg-primary"
+                          : "border-base-300"
+                      }`}
+                    >
+                      {selected && (
+                        <span className="m-1 block h-2.5 w-2.5 rounded-full bg-primary-content" />
+                      )}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ======================================
+          STEP 4
+      ====================================== */}
+
+      {step === 4 && (
+        <div>
+          <QuestionTitle
+            number="04"
+            title="Tell us your requirements"
+            description="These preferences will help us create a more suitable build."
+          />
+
+          <div className="grid gap-8 md:grid-cols-2">
+            {/* RAM */}
+
+            <div>
+              <label className="mb-3 block text-sm font-bold text-base-content">
+                Preferred RAM
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                {ramOptions.map((ram) => {
+                  const selected =
+                    requirements.ram === ram;
+
+                  return (
+                    <button
+                      key={ram}
+                      type="button"
+                      onClick={() =>
+                        updateRequirement(
+                          "ram",
+                          ram
+                        )
+                      }
+                      className={`rounded-xl border p-4 font-semibold transition-all ${
+                        selected
+                          ? "border-primary bg-primary/5 text-base-content ring-1 ring-primary/20"
+                          : "border-base-300 bg-base-100 text-base-content/60 hover:border-primary hover:text-base-content"
+                      }`}
+                    >
+                      {ram}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* STORAGE */}
+
+            <div>
+              <label className="mb-3 block text-sm font-bold text-base-content">
+                Preferred Storage
+              </label>
+
+              <div className="grid gap-3">
+                {storageOptions.map((storage) => {
+                  const selected =
+                    requirements.storage === storage;
+
+                  return (
+                    <button
+                      key={storage}
+                      type="button"
+                      onClick={() =>
+                        updateRequirement(
+                          "storage",
+                          storage
+                        )
+                      }
+                      className={`rounded-xl border p-4 text-left font-semibold transition-all ${
+                        selected
+                          ? "border-primary bg-primary/5 text-base-content ring-1 ring-primary/20"
+                          : "border-base-300 bg-base-100 text-base-content/60 hover:border-primary hover:text-base-content"
+                      }`}
+                    >
+                      {storage}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <p className="mt-3 text-xs leading-5 text-base-content/50">
+                Storage options are based on products
+                currently available in our product database.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================
+          NAVIGATION
+      ====================================== */}
+
+      <div
+        className="
+          mt-10
+          flex
+          flex-col-reverse
+          gap-3
+          border-t
+          border-base-300
+          pt-6
+          sm:flex-row
+          sm:items-center
+          sm:justify-between
+        "
+      >
+        {/* Back */}
 
         <button
           type="button"
-          onClick={buildAgain}
-          className="mt-6 rounded-xl bg-[#606C38] px-6 py-3 font-bold text-white transition hover:bg-[#4F5A2E]"
+          onClick={previousStep}
+          disabled={step === 1}
+          className={`rounded-xl px-6 py-3 font-semibold transition ${
+            step === 1
+              ? "cursor-not-allowed text-base-content/30"
+              : "text-base-content/60 hover:bg-base-200 hover:text-base-content"
+          }`}
         >
-          ← Build Again
+          ← Back
         </button>
+
+        {/* Continue / Generate */}
+
+        {step < 4 ? (
+          <button
+            type="button"
+            onClick={nextStep}
+            disabled={!canContinue()}
+            className={`rounded-xl px-8 py-3 font-bold transition ${
+              canContinue()
+                ? "bg-primary text-primary-content shadow-md shadow-primary/20 hover:bg-accent"
+                : "cursor-not-allowed bg-base-300 text-base-content/40"
+            }`}
+          >
+            Continue →
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={generateBuild}
+            disabled={!canContinue()}
+            className={`rounded-xl px-8 py-3 font-bold transition ${
+              canContinue()
+                ? "bg-primary text-primary-content shadow-md shadow-primary/20 hover:bg-accent"
+                : "cursor-not-allowed bg-base-300 text-base-content/40"
+            }`}
+          >
+            Generate My PC ✨
+          </button>
+        )}
       </div>
-    );
-  }
-
-  const products = buildData.products;
-
-  // Use the total calculated by the backend.
-  const totalPrice = Number(buildData.total_price || 0);
-
-  const formatPrice = (price) => {
-    return Number(price || 0).toLocaleString("en-BD");
-  };
-
-  const parseImages = (images) => {
-    if (!images) return [];
-
-    if (Array.isArray(images)) {
-      return images;
-    }
-
-    try {
-      const parsed = JSON.parse(images);
-
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  };
-
-  return (
-    <div className="mx-auto max-w-6xl">
-
-      {/* ==========================================
-          RESULT HEADER
-      ========================================== */}
-
-      <div className="mb-8 text-center">
-        <span className="text-sm font-black tracking-widest text-[#BC6C25]">
-          05
-        </span>
-
-        <h1 className="mt-2 text-3xl font-black text-[#283618] sm:text-4xl">
-          Your PC Recommendation
-        </h1>
-
-        <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[#6B705C] sm:text-base">
-          This configuration was generated using your requirements
-          and real products from the shop.
-        </p>
-      </div>
-
-      {/* ==========================================
-          TOTAL
-      ========================================== */}
-
-      <div className="mb-8 rounded-3xl border border-[#E5E1D0] bg-white p-6 shadow-[0_10px_40px_rgba(40,54,24,0.06)] sm:p-8">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-
-          <div>
-            <p className="text-sm font-semibold text-[#6B705C]">
-              Estimated Total
-            </p>
-
-            <h2 className="mt-1 text-3xl font-black text-[#283618] sm:text-4xl">
-              ৳{formatPrice(totalPrice)}
-            </h2>
-          </div>
-
-          <div className="rounded-2xl bg-[#F7F5EA] px-5 py-4">
-            <p className="text-xs font-semibold text-[#6B705C]">
-              Your Budget
-            </p>
-
-            <p className="mt-1 font-black text-[#283618]">
-              {requirements.budget}
-            </p>
-          </div>
-
-        </div>
-      </div>
-
-      {/* ==========================================
-          REQUIREMENTS
-      ========================================== */}
-
-      <div className="mb-8 rounded-3xl border border-[#E5E1D0] bg-white p-6 shadow-[0_10px_40px_rgba(40,54,24,0.06)] sm:p-8">
-
-        <h2 className="text-xl font-black text-[#283618]">
-          Your Requirements
-        </h2>
-
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
-          <Requirement
-            title="PC Type"
-            value={requirements.type}
-          />
-
-          <Requirement
-            title="Budget"
-            value={requirements.budget}
-          />
-
-          <Requirement
-            title="Priority"
-            value={requirements.priority}
-          />
-
-          <Requirement
-            title="RAM"
-            value={requirements.ram}
-          />
-
-          <Requirement
-            title="Storage"
-            value={requirements.storage}
-          />
-
-        </div>
-      </div>
-
-      {/* ==========================================
-          COMPONENTS
-      ========================================== */}
-
-      <div className="mb-8">
-
-        <div className="mb-5">
-          <h2 className="text-2xl font-black text-[#283618]">
-            Recommended Components
-          </h2>
-
-          <p className="mt-1 text-sm text-[#6B705C]">
-            Real products selected from the shop database.
-          </p>
-        </div>
-
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-
-          {products.map((product, index) => {
-
-            const imageList = parseImages(product.images);
-
-            const image =
-              imageList.length > 0
-                ? imageList[0]
-                : null;
-
-            const price = Number(product.price || 0);
-
-            const category =
-              product.selected_category ||
-              product.category ||
-              "Component";
-
-            return (
-              <div
-                key={`${product.id}-${index}`}
-                className="group overflow-hidden rounded-2xl border border-[#E5E1D0] bg-white shadow-[0_8px_30px_rgba(40,54,24,0.05)] transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-              >
-
-                {/* Image */}
-
-                <div className="flex h-56 items-center justify-center bg-[#F8F7F1] p-5">
-
-                  {image ? (
-                    <img
-                      src={image}
-                      alt={product.name}
-                      className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                      onError={(event) => {
-                        event.currentTarget.style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    <div className="text-5xl">
-                      🖥️
-                    </div>
-                  )}
-
-                </div>
-
-                {/* Content */}
-
-                <div className="p-5">
-
-                  <div className="mb-3 flex items-center justify-between gap-3">
-
-                    <span className="text-xs font-black uppercase tracking-wide text-[#BC6C25]">
-                      {category}
-                    </span>
-
-                    {product.status && (
-                      <span
-                        className={`text-xs font-bold ${
-                          String(product.status)
-                            .toLowerCase()
-                            .includes("out")
-                            ? "text-red-500"
-                            : "text-[#606C38]"
-                        }`}
-                      >
-                        {product.status}
-                      </span>
-                    )}
-
-                  </div>
-
-                  <h3 className="min-h-[52px] text-lg font-black leading-6 text-[#283618]">
-                    {product.name}
-                  </h3>
-
-                  {product.brand && (
-                    <p className="mt-2 text-sm text-[#6B705C]">
-                      Brand:{" "}
-                      <span className="font-bold">
-                        {product.brand}
-                      </span>
-                    </p>
-                  )}
-
-                  {/* Price */}
-
-                  <div className="mt-5 border-t border-[#E5E1D0] pt-4">
-
-                    <p className="text-xs font-semibold text-[#6B705C]">
-                      Price
-                    </p>
-
-                    <p className="mt-1 text-2xl font-black text-[#283618]">
-                      ৳{formatPrice(price)}
-                    </p>
-
-                    {product.old_price &&
-                      Number(product.old_price) > price && (
-                        <p className="text-sm text-[#9A978B] line-through">
-                          ৳{formatPrice(product.old_price)}
-                        </p>
-                      )}
-
-                  </div>
-
-                  {/* View Product */}
-
-                  {product.url && (
-                    <a
-                      href={product.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-5 block rounded-xl bg-[#F7F5EA] px-4 py-3 text-center text-sm font-bold text-[#283618] transition hover:bg-[#EDEAD8]"
-                    >
-                      View Product →
-                    </a>
-                  )}
-
-                </div>
-              </div>
-            );
-          })}
-
-        </div>
-      </div>
-
-      {/* ==========================================
-          FINAL SUMMARY
-      ========================================== */}
-
-      <div className="rounded-3xl border border-[#E5E1D0] bg-white p-6 shadow-[0_10px_40px_rgba(40,54,24,0.06)] sm:p-8">
-
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-
-          <div>
-
-            <p className="text-sm text-[#6B705C]">
-              Estimated Total
-            </p>
-
-            <h2 className="mt-1 text-3xl font-black text-[#283618]">
-              ৳{formatPrice(totalPrice)}
-            </h2>
-
-            <p className="mt-1 text-sm text-[#6B705C]">
-              {products.length} components selected
-            </p>
-
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-
-            <button
-              type="button"
-              onClick={buildAgain}
-              className="rounded-xl border border-[#E5E1D0] px-6 py-3 font-bold text-[#6B705C] transition hover:border-[#606C38] hover:bg-[#F7F5EA] hover:text-[#283618]"
-            >
-              ← Build Again
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                alert(
-                  "Entire build added to cart!"
-                );
-              }}
-              className="rounded-xl bg-[#BC6C25] px-6 py-3 font-bold text-white shadow-md transition hover:bg-[#A75E20]"
-            >
-              🛒 Add Entire Build to Cart
-            </button>
-
-          </div>
-
-        </div>
-
-        <div className="mt-6 flex items-center gap-2 rounded-xl bg-[#F7F5EA] px-4 py-3 text-sm font-semibold text-[#606C38]">
-          <span>✓</span>
-          Based on real shop inventory
-        </div>
-
-      </div>
-
     </div>
   );
 };
 
+/* ==========================================
+   Question Title
+========================================== */
 
-// ==========================================
-// REQUIREMENT CARD
-// ==========================================
-
-const Requirement = ({ title, value }) => {
+const QuestionTitle = ({
+  number,
+  title,
+  description,
+}) => {
   return (
-    <div className="rounded-xl bg-[#F8F7F1] p-4">
-      <p className="text-xs font-bold uppercase tracking-wide text-[#8A877A]">
+    <div className="mb-8">
+      <span className="text-sm font-black tracking-widest text-primary">
+        {number}
+      </span>
+
+      <h2 className="mt-2 text-2xl font-black text-base-content sm:text-3xl">
         {title}
-      </p>
+      </h2>
 
-      <p className="mt-1 font-bold text-[#283618]">
-        {value || "Not specified"}
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-base-content/60 sm:text-base">
+        {description}
       </p>
     </div>
   );
 };
 
-export default BuildResult;
+export default BuildQuestions;
