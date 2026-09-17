@@ -166,44 +166,6 @@ const Navbar = () => {
                   </NavLink>
                 </li>
               ))}
-
-              {/* MOBILE CART */}
-
-              <li className="mt-1 border-t border-secondary-content/10 pt-1">
-                <NavLink
-                  to="/cart"
-                  className={mobileNavLinkClass}
-                >
-                  <span className="flex items-center gap-3">
-                    <FaShoppingCart />
-
-                    <span>Cart</span>
-
-                    {cartItemCount > 0 && (
-                      <span
-                        className="
-                          ml-auto
-                          flex
-                          min-w-6
-                          items-center
-                          justify-center
-                          rounded-full
-                          bg-primary
-                          px-1.5
-                          py-0.5
-                          text-[10px]
-                          font-extrabold
-                          text-primary-content
-                        "
-                      >
-                        {cartItemCount > 99
-                          ? "99+"
-                          : cartItemCount}
-                      </span>
-                    )}
-                  </span>
-                </NavLink>
-              </li>
             </ul>
           </div>
 
