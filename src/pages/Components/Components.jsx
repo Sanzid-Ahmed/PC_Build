@@ -1,3 +1,4 @@
+
 /* eslint-disable react-hooks/set-state-in-effect */
 
 import React, {
@@ -38,7 +39,6 @@ const Components = () => {
   ===================================================== */
 
   const [minPrice, setMinPrice] = useState(0);
-
   const [maxPrice, setMaxPrice] = useState(0);
 
   const [priceRange, setPriceRange] = useState({
@@ -64,9 +64,7 @@ const Components = () => {
         Number(product.price) || 0,
 
       searchableName:
-        String(
-          product.name || ""
-        ).toLowerCase(),
+        String(product.name || "").toLowerCase(),
     }));
   }, [products]);
 
@@ -196,6 +194,7 @@ const Components = () => {
 
     for (const product of preparedProducts) {
       /* Category */
+
       if (
         selectedCategory !== "All" &&
         product.category !== selectedCategory
@@ -204,6 +203,7 @@ const Components = () => {
       }
 
       /* Store */
+
       if (
         selectedStore !== "All" &&
         product.store !== selectedStore
@@ -212,6 +212,7 @@ const Components = () => {
       }
 
       /* Price */
+
       if (
         product.numericPrice < minPrice ||
         product.numericPrice > maxPrice
@@ -223,6 +224,7 @@ const Components = () => {
     }
 
     /* Sort */
+
     if (sortOption === "price-low") {
       result.sort(
         (a, b) =>
@@ -380,13 +382,51 @@ const Components = () => {
 
   if (error) {
     return (
-      <section className="flex min-h-screen items-center justify-center bg-[#FFFEF7] px-4 sm:px-5">
-        <div className="w-full max-w-lg rounded-2xl border border-red-200 bg-white p-6 text-center shadow-lg sm:p-8">
-          <h2 className="text-xl font-bold text-red-600 sm:text-2xl">
+      <section
+        className="
+          flex
+          min-h-screen
+          items-center
+          justify-center
+          bg-base-100
+          px-4
+          sm:px-5
+        "
+      >
+        <div
+          className="
+            w-full
+            max-w-lg
+            rounded-2xl
+            border
+            border-error/20
+            bg-base-100
+            p-6
+            text-center
+            shadow-lg
+            sm:p-8
+          "
+        >
+          <h2
+            className="
+              text-xl
+              font-bold
+              text-error
+              sm:text-2xl
+            "
+          >
             Failed to Load Components
           </h2>
 
-          <p className="mt-3 break-words text-sm text-[#6B705C] sm:text-base">
+          <p
+            className="
+              mt-3
+              break-words
+              text-sm
+              text-base-content/60
+              sm:text-base
+            "
+          >
             {error}
           </p>
 
@@ -394,7 +434,19 @@ const Components = () => {
             onClick={() =>
               window.location.reload()
             }
-            className="mt-6 rounded-xl bg-[#606C38] px-6 py-3 font-semibold text-white transition hover:bg-[#4f5b2d]"
+            className="
+              mt-6
+              rounded-xl
+              bg-primary
+              px-6
+              py-3
+              font-semibold
+              text-primary-content
+              transition-all
+              duration-200
+              hover:bg-accent
+              hover:shadow-md
+            "
           >
             Try Again
           </button>
@@ -408,42 +460,115 @@ const Components = () => {
   ===================================================== */
 
   return (
-    <section className="min-h-screen overflow-x-hidden px-3 pb-16 pt-24 sm:px-5 sm:pb-20 sm:pt-28">
-      <div className="mx-auto w-full max-w-7xl">
+    <section
+      className="
+        min-h-screen
+        overflow-x-hidden
+        bg-base-100
+        px-3
+        pb-16
+        pt-24
+        sm:px-5
+        sm:pb-20
+        sm:pt-28
+      "
+    >
+      <div
+        className="
+          mx-auto
+          w-full
+          xl:w-10/12
+        "
+      >
 
-        {/* HEADER */}
+        {/* ================= HEADER ================= */}
+
         <div className="mb-7 sm:mb-10">
-          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-
+          <div
+            className="
+              flex
+              flex-col
+              gap-5
+              md:flex-row
+              md:items-end
+              md:justify-between
+            "
+          >
             <div className="min-w-0">
-              <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[#BC6C25] sm:text-sm sm:tracking-[0.2em]">
+
+              <p
+                className="
+                  mb-2
+                  text-xs
+                  font-bold
+                  uppercase
+                  tracking-[0.16em]
+                  text-primary
+                  sm:text-sm
+                  sm:tracking-[0.2em]
+                "
+              >
                 ThriftBuild Components
               </p>
 
-              <h1 className="text-2xl font-extrabold leading-tight text-[#283618] sm:text-3xl md:text-4xl">
+              <h1
+                className="
+                  text-2xl
+                  font-extrabold
+                  leading-tight
+                  text-base-content
+                  sm:text-3xl
+                  md:text-4xl
+                "
+              >
                 Find the Right Components
               </h1>
 
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-[#6B705C] sm:text-base">
+              <p
+                className="
+                  mt-3
+                  max-w-2xl
+                  text-sm
+                  leading-6
+                  text-base-content/60
+                  sm:text-base
+                "
+              >
                 Browse PC components from
                 different stores and find the
                 right products at the right price.
               </p>
+
             </div>
           </div>
         </div>
 
-        {/* MAIN GRID */}
-        <div className="z-5 grid min-w-0 gap-6 lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-7 xl:grid-cols-[270px_minmax(0,1fr)] xl:gap-8">
 
-          {/* SIDEBAR */}
+        {/* ================= MAIN GRID ================= */}
+
+        <div
+          className="
+            grid
+            min-w-0
+            gap-6
+            lg:grid-cols-[250px_minmax(0,1fr)]
+            lg:gap-7
+            xl:grid-cols-[270px_minmax(0,1fr)]
+            xl:gap-8
+          "
+        >
+
+          {/* ================= SIDEBAR ================= */}
+
           <FilterSidebar
             categories={categories}
             stores={stores}
             categoryCounts={categoryCounts}
             storeCounts={storeCounts}
             selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
+            setSelectedCategory={
+              setSelectedCategory
+            }
             selectedStore={selectedStore}
             setSelectedStore={setSelectedStore}
             minPrice={minPrice}
@@ -455,10 +580,13 @@ const Components = () => {
             setCurrentPage={setCurrentPage}
           />
 
-          {/* PRODUCTS */}
+
+          {/* ================= PRODUCTS ================= */}
+
           <div className="min-w-0">
 
             {/* SORT */}
+
             <SortBar
               sortOption={sortOption}
               setSortOption={setSortOption}
@@ -468,7 +596,9 @@ const Components = () => {
               }
             />
 
+
             {/* ACTIVE FILTERS */}
+
             <ActiveFilters
               selectedCategory={
                 selectedCategory
@@ -485,9 +615,22 @@ const Components = () => {
               }
             />
 
+
             {/* PRODUCT GRID */}
+
             {paginatedProducts.length > 0 ? (
-              <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3 xl:gap-6">
+              <div
+                className="
+                  grid
+                  min-w-0
+                  grid-cols-1
+                  gap-4
+                  sm:grid-cols-3
+                  sm:gap-5
+                  xl:grid-cols-4
+                  xl:gap-6
+                "
+              >
                 {paginatedProducts.map(
                   (product) => (
                     <ProductCard
@@ -498,26 +641,69 @@ const Components = () => {
                 )}
               </div>
             ) : (
-              <div className="rounded-2xl border border-[#E5E1D0] bg-white px-5 py-16 text-center shadow-sm sm:px-6 sm:py-20">
-                <h3 className="text-lg font-bold text-[#283618] sm:text-xl">
+              <div
+                className="
+                  rounded-2xl
+                  border
+                  border-base-300
+                  bg-base-100
+                  px-5
+                  py-16
+                  text-center
+                  shadow-sm
+                  sm:px-6
+                  sm:py-20
+                "
+              >
+                <h3
+                  className="
+                    text-lg
+                    font-bold
+                    text-base-content
+                    sm:text-xl
+                  "
+                >
                   No Components Found
                 </h3>
 
-                <p className="mx-auto mt-2 max-w-md text-sm text-[#6B705C]">
+                <p
+                  className="
+                    mx-auto
+                    mt-2
+                    max-w-md
+                    text-sm
+                    text-base-content/60
+                  "
+                >
                   No components match your
                   current filters.
                 </p>
 
                 <button
                   onClick={resetFilters}
-                  className="mt-6 rounded-xl bg-[#606C38] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#4f5b2d]"
+                  className="
+                    mt-6
+                    rounded-xl
+                    bg-primary
+                    px-5
+                    py-3
+                    text-sm
+                    font-bold
+                    text-primary-content
+                    transition-all
+                    duration-200
+                    hover:bg-accent
+                    hover:shadow-md
+                  "
                 >
                   Clear Filters
                 </button>
               </div>
             )}
 
-            {/* PAGINATION */}
+
+            {/* ================= PAGINATION ================= */}
+
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

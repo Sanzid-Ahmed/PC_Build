@@ -19,40 +19,89 @@ const ActiveFilters = ({
   return (
     <div className="mb-5 flex flex-wrap items-center gap-2 sm:mb-6">
 
-      <span className="text-xs font-semibold text-[#6B705C] sm:text-sm">
+      {/* ================= LABEL ================= */}
+
+      <span
+        className="
+          text-xs
+          font-semibold
+          text-base-content/60
+          sm:text-sm
+        "
+      >
         Active filters:
       </span>
 
-      {/* CATEGORY */}
+
+      {/* ================= CATEGORY ================= */}
+
       {selectedCategory !== "All" && (
         <button
           onClick={() => {
             setSelectedCategory("All");
             setCurrentPage(1);
           }}
-          className="flex max-w-full items-center gap-2 rounded-full border border-[#606C38] bg-[#F7F5EA] px-3 py-1.5 text-xs font-semibold text-[#606C38]"
+          className="
+            flex
+            max-w-full
+            items-center
+            gap-2
+            rounded-full
+            border
+            border-primary/25
+            bg-primary/5
+            px-3
+            py-1.5
+            text-xs
+            font-semibold
+            text-primary
+            transition-all
+            duration-200
+            hover:border-primary
+            hover:bg-primary
+            hover:text-primary-content
+          "
         >
           <span className="max-w-[180px] truncate">
-            Category:{" "}
-            {selectedCategory}
+            Category: {selectedCategory}
           </span>
 
           <FaTimes className="shrink-0 text-[10px]" />
         </button>
       )}
 
-      {/* STORE */}
+
+      {/* ================= STORE ================= */}
+
       {selectedStore !== "All" && (
         <button
           onClick={() => {
             setSelectedStore("All");
             setCurrentPage(1);
           }}
-          className="flex max-w-full items-center gap-2 rounded-full border border-[#606C38] bg-[#F7F5EA] px-3 py-1.5 text-xs font-semibold text-[#606C38]"
+          className="
+            flex
+            max-w-full
+            items-center
+            gap-2
+            rounded-full
+            border
+            border-primary/25
+            bg-primary/5
+            px-3
+            py-1.5
+            text-xs
+            font-semibold
+            text-primary
+            transition-all
+            duration-200
+            hover:border-primary
+            hover:bg-primary
+            hover:text-primary-content
+          "
         >
           <span className="max-w-[180px] truncate">
-            Store:{" "}
-            {selectedStore}
+            Store: {selectedStore}
           </span>
 
           <FaTimes className="shrink-0 text-[10px]" />

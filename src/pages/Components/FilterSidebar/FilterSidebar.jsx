@@ -34,35 +34,47 @@ const FilterSidebar = ({
         flex-col
         rounded-2xl
         border
-        border-[#E5E1D0]
-        bg-white
+        border-base-300
+        bg-base-100
         p-4
-        shadow-[0_5px_25px_rgba(40,54,24,0.05)]
+        shadow-sm
         sm:p-5
       "
     >
 
-      {/* HEADER */}
+      {/* ================= HEADER ================= */}
+
       <div className="mb-6 flex items-center justify-between">
 
         <div className="flex items-center gap-2">
-          <FaFilter className="text-sm text-[#606C38]" />
 
-          <h2 className="font-bold text-[#283618]">
+          <FaFilter className="text-sm text-primary" />
+
+          <h2 className="font-bold text-base-content">
             Filters
           </h2>
+
         </div>
 
         <button
           onClick={resetFilters}
-          className="text-xs font-semibold text-[#BC6C25] hover:underline"
+          className="
+            text-xs
+            font-semibold
+            text-primary
+            transition-colors
+            hover:text-accent
+            hover:underline
+          "
         >
           Reset
         </button>
 
       </div>
 
-      {/* PRICE */}
+
+      {/* ================= PRICE ================= */}
+
       <PriceRange
         minPrice={minPrice}
         maxPrice={maxPrice}
@@ -72,7 +84,9 @@ const FilterSidebar = ({
         setCurrentPage={setCurrentPage}
       />
 
-      {/* CATEGORY */}
+
+      {/* ================= CATEGORY ================= */}
+
       <CategoryFilter
         categories={categories}
         categoryCounts={categoryCounts}
@@ -81,7 +95,9 @@ const FilterSidebar = ({
         setCurrentPage={setCurrentPage}
       />
 
-      {/* STORE */}
+
+      {/* ================= STORE ================= */}
+
       <StoreFilter
         stores={stores}
         storeCounts={storeCounts}
