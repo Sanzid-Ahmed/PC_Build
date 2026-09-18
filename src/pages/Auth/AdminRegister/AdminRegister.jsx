@@ -12,7 +12,7 @@ import SocialLogin from "../SocialLogin/SocialLogin";
 
 import axios from "axios";
 
-const Register = () => {
+const AdminRegister = () => {
   const {
     register,
     handleSubmit,
@@ -90,10 +90,10 @@ const Register = () => {
         name: data.name,
 
         // User account
-        role: "user",
+        role: "admin",
 
         // Normal users get 10 builds
-        build_limit: 10,
+        build_limit: 1000,
       };
 
       console.log("Sending to Backend:", backendData);
@@ -430,11 +430,11 @@ const Register = () => {
         {/* Social Login */}
 
         <div className="mt-6">
-          <SocialLogin role="user" />
+          <SocialLogin role="admin" />
         </div>
       </div>
     </div>
   );
 };
 
-export default Register;
+export default AdminRegister;

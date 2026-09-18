@@ -38,10 +38,7 @@ const Logo = () => {
             >
               PC
             </span>
-
-            <span className="text-white">
-              PC<span className="text-primary">Builder</span>
-            </span>
+            <span className="text-primary -m-1">Builder</span>
           </Link>
         </div>
     );

@@ -6,7 +6,7 @@ import useAuth from "../../../hooks/useAuth";
 import { Link, useLocation, useNavigate } from "react-router";
 import SocialLogin from "../SocialLogin/SocialLogin";
 
-const Login = () => {
+const AdminLogin = () => {
   const {
     register,
     handleSubmit,
@@ -168,11 +168,11 @@ const Login = () => {
 
         {/* Social Login */}
         <div className="mt-6">
-          <SocialLogin role="user" />
+          <SocialLogin role="admin" />
         </div>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default AdminLogin;

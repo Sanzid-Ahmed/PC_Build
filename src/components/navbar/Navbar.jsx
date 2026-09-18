@@ -49,7 +49,7 @@ const Navbar = () => {
   // =========================
 
   const navLinkClass = ({ isActive }) =>
-    `relative rounded-lg px-4 py-2 text-sm font-semibold
+    `relative rounded px-4 py-2 text-sm font-semibold
     transition-all duration-300
     ${
       isActive
@@ -285,11 +285,12 @@ const Navbar = () => {
                     overflow-hidden
                     rounded-full
                     border-2
-                    border-primary
+                    border-primary-content
                     bg-base-200
                     shadow-md
                     sm:h-11
                     sm:w-11
+                    hover:cursor-pointer
                   "
                   title={user.displayName || user.email}
                 >
@@ -333,14 +334,17 @@ const Navbar = () => {
                   type="button"
                   onClick={handleLogOut}
                   className="
-                    btn
-                    border-none
+                    px-5
+                    py-2
+                    rounded
                     bg-primary
                     text-primary-content
+                    font-bold
                     transition-all
                     duration-300
                     hover:bg-accent
                     hover:shadow-md
+                    hover:cursor-pointer
                   "
                 >
                   Log Out
@@ -352,10 +356,12 @@ const Navbar = () => {
               <Link
                 to="/login"
                 className="
-                  btn
-                  border-none
+                  px-6
+                  py-2
+                  rounded
                   bg-primary
                   text-primary-content
+                  font-bold
                   transition-all
                   duration-300
                   hover:bg-accent

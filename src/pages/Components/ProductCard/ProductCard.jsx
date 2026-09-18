@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router";
 import {
   FaMicrochip,
   FaShoppingCart,
@@ -12,6 +13,7 @@ import { useCart } from "../../../hooks/useCart";
 const ProductCard = ({ product }) => {
   const [imageError, setImageError] = useState(false);
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   /* =====================================================
      PARSE IMAGES
@@ -380,6 +382,7 @@ const ProductCard = ({ product }) => {
                   sm:px-4
                   sm:text-sm
                 "
+                onClick={() => navigate(`/product/${product.id}`)}
               >
                 View Details
               </button>

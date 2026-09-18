@@ -9,6 +9,9 @@ import Login from "../pages/Auth/Login/Login";
 import Register from "../pages/Auth/Register/Register";
 import PrivateRoute from "./PrivateRoute";
 import Cart from "../pages/Cart/Cart";
+import ProductDetails from "../pages/Components/ProductDetails/ProductDetails";
+import AdminLogin from "../pages/Auth/AdminLogin/AdminLogin";
+import AdminRegister from "../pages/Auth/AdminRegister/AdminRegister";
 
 export const router = createBrowserRouter([
     {
@@ -22,6 +25,10 @@ export const router = createBrowserRouter([
             {
                 path:"components",
                 Component: Components
+            },
+            {
+                path: "/product/:id",
+                element: <ProductDetails />
             },
             {
                 path:"build-pc", 
@@ -49,6 +56,14 @@ export const router = createBrowserRouter([
       {
         path: 'register',
         Component: Register
+      },
+      {
+        path: "/admin/login",
+        element: <AdminLogin />,
+      },
+      {
+        path: "/admin/register",
+        element: <AdminRegister />,
       }
     ]
   },

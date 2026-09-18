@@ -178,7 +178,7 @@ const Collaborate = () => {
           "
         >
           Collaborate With
-          <span className="text-primary"> Us</span>
+          <span className=""> Us</span>
         </h2>
 
         {/* Description */}
