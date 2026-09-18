@@ -1,21 +1,27 @@
-/* eslint-disable no-unused-vars */
-import React from 'react';
-import useAuth from '../hooks/useAuth';
-import { Navigate, useLocation } from 'react-router';
+import React from "react";
+import useAuth from "../hooks/useAuth";
+import { Navigate, useLocation } from "react-router";
 
 const PrivateRoute = ({ children }) => {
-
-    const {user, loading} = useAuth();
+    const { user, loading } = useAuth();
     const location = useLocation();
 
-    if(loading){
-        return <div>
-            <span className="loading loading-infinity loading-xl"></span>
-        </div>
+    if (loading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <span className="loading loading-infinity loading-xl text-primary"></span>
+            </div>
+        );
     }
 
-    if(!user){
-        return <Navigate state={ location.pathname } to='/login'></Navigate>
+    if (!user) {
+        return (
+            <Navigate
+                to="/login"
+                state={{ from: location }}
+                replace
+            />
+        );
     }
 
     return children;

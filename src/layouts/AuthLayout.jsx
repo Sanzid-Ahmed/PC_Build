@@ -1,231 +1,325 @@
 import React, { useState } from "react";
 
+import { Outlet, useNavigate } from "react-router";
+
 import {
-  Outlet,
-  useNavigate,
-} from "react-router";
+  FaArrowLeft,
+  FaCog,
+  FaLock,
+  FaTimes,
+  FaShieldAlt,
+} from "react-icons/fa";
 
 import Logo from "../components/logo/Logo";
 
 import AuthImage from "../assets/Auth.jpg";
 
-
 const ADMIN_PASSCODE = "admin1234";
-console.log(ADMIN_PASSCODE);
-
 
 const AuthLayout = () => {
-
   const navigate = useNavigate();
 
-  const [showAdminModal, setShowAdminModal] =
-    useState(false);
+  const [showAdminModal, setShowAdminModal] = useState(false);
 
-  const [adminPassword, setAdminPassword] =
-    useState("");
+  const [adminPassword, setAdminPassword] = useState("");
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
 
+  // =========================================================
+  // BACK BUTTON
+  // =========================================================
 
-  // ==========================================
-  // Open Admin Password Modal
-  // ==========================================
+  const handleGoBack = () => {
+    // If there is a previous browser history entry,
+    // go back to that page.
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      // If there is no previous history,
+      // go to Home.
+      navigate("/", { replace: true });
+    }
+  };
+
+  // =========================================================
+  // ADMIN MODAL
+  // =========================================================
 
   const openAdminAccess = () => {
-
     setAdminPassword("");
+
     setError("");
 
     setShowAdminModal(true);
-
   };
 
+  const closeAdminAccess = () => {
+    setShowAdminModal(false);
 
-  // ==========================================
-  // Verify Admin Password
-  // ==========================================
+    setAdminPassword("");
+
+    setError("");
+  };
+
+  // =========================================================
+  // ADMIN LOGIN
+  // =========================================================
 
   const handleAdminAccess = (e) => {
-
     e.preventDefault();
 
-
-    if (
-      adminPassword === ADMIN_PASSCODE
-    ) {
-
-      setShowAdminModal(false);
-
-      setAdminPassword("");
-
-      setError("");
+    if (adminPassword === ADMIN_PASSCODE) {
+      closeAdminAccess();
 
       navigate("/admin/login");
-
     } else {
-
-      setError(
-        "Incorrect admin access password."
-      );
-
+      setError("Incorrect admin access password.");
     }
-
   };
 
+  // =========================================================
+  // CLOSE MODAL WITH ESC
+  // =========================================================
+
+  React.useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && showAdminModal) {
+        closeAdminAccess();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [showAdminModal]);
 
   return (
+    <div className="relative min-h-screen overflow-hidden bg-base-200">
+      {/* =====================================================
+          BACKGROUND DECORATION
+      ====================================================== */}
 
-    <div className="relative min-h-screen">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div
+          className="
+            absolute
+            -left-40
+            -top-40
+            h-[28rem]
+            w-[28rem]
+            rounded-full
+            bg-primary/10
+            blur-[120px]
+          "
+        />
 
-
-      {/* ================= LOGO ================= */}
-
-      <div
-        className="
-          absolute
-          left-6
-          top-6
-          z-30
-          lg:left-10
-          lg:top-8
-        "
-      >
-
-        <Logo />
-
+        <div
+          className="
+            absolute
+            -bottom-40
+            -right-40
+            h-[30rem]
+            w-[30rem]
+            rounded-full
+            bg-primary/10
+            blur-[130px]
+          "
+        />
       </div>
 
+      {/* =====================================================
+          TOP NAVIGATION
+      ====================================================== */}
 
-      {/* ================= GO BACK ================= */}
-
-      <button
-        onClick={() => navigate(-1)}
+      <header
         className="
           absolute
-          right-6
-          top-6
-          z-30
-          inline-flex
-          cursor-pointer
+          left-0
+          right-0
+          top-0
+          z-40
+          flex
           items-center
-          gap-2
-          rounded-lg
-          bg-secondary
+          justify-between
           px-4
-          py-2
-          text-sm
-          font-bold
-          text-primary-content
-          transition-all
-          duration-300
-          hover:bg-primary
-          hover:text-white
-          lg:right-10
-          lg:top-8
+          py-4
+          sm:px-6
+          sm:py-5
+          lg:px-10
+          lg:py-7
         "
       >
+        {/* LOGO */}
 
-        <span className="text-lg">
-          ←
-        </span>
+        <div className="shrink-0">
+          <Logo />
+        </div>
 
-        Go Back
+        {/* RIGHT ACTIONS */}
 
-      </button>
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* ADMIN ACCESS */}
 
+          <button
+            type="button"
+            onClick={openAdminAccess}
+            className="
+              group
+              inline-flex
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              border
+              border-primary/30
+              bg-black/60
+              px-3
+              py-2
+              text-xs
+              font-semibold
+              text-white
+              shadow-lg
+              backdrop-blur-md
+              transition-all
+              duration-300
+              hover:border-primary
+              hover:bg-primary
+              hover:shadow-primary/20
+              active:scale-95
+              sm:px-4
+              sm:py-2.5
+              sm:text-sm
+            "
+          >
+            <FaCog
+              className="
+                text-[11px]
+                transition-transform
+                duration-300
+                group-hover:rotate-90
+                sm:text-xs
+              "
+            />
 
-      {/* ================= ADMIN ACCESS ================= */}
+            <span className="hidden sm:inline">
+              Admin Access
+            </span>
 
-      <button
-        type="button"
-        onClick={openAdminAccess}
-        className="
-          absolute
-          right-6
-          top-20
-          z-30
-          inline-flex
-          cursor-pointer
-          items-center
-          gap-2
-          rounded-lg
-          border
-          border-primary/40
-          bg-black/70
-          px-4
-          py-2
-          text-sm
-          font-semibold
-          text-white
-          backdrop-blur-md
-          transition-all
-          duration-300
-          hover:border-primary
-          hover:bg-primary
-          lg:right-10
-          lg:top-20
-        "
-      >
+            <span className="sm:hidden">
+              Admin
+            </span>
+          </button>
 
-        <span>
-          ⚙
-        </span>
+          {/* GO BACK */}
 
-        Admin Access
+          <button
+            type="button"
+            onClick={handleGoBack}
+            className="
+              group
+              inline-flex
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              border
+              border-base-content/10
+              bg-base-100/90
+              px-3
+              py-2
+              text-xs
+              font-bold
+              text-base-content
+              shadow-lg
+              backdrop-blur-md
+              transition-all
+              duration-300
+              hover:border-primary/30
+              hover:bg-primary
+              hover:text-primary-content
+              hover:shadow-primary/20
+              active:scale-95
+              sm:px-4
+              sm:py-2.5
+              sm:text-sm
+            "
+          >
+            <FaArrowLeft
+              className="
+                shrink-0
+                text-[10px]
+                transition-transform
+                duration-300
+                group-hover:-translate-x-1
+                sm:text-xs
+              "
+            />
 
-      </button>
+            <span>Back</span>
+          </button>
+        </div>
+      </header>
 
+      {/* =====================================================
+          MAIN CONTENT
+      ====================================================== */}
 
-      {/* ================= CENTER ================= */}
-
-      <div
+      <main
         className="
           flex
           min-h-screen
           items-center
           justify-center
-          border-2
-          border-base-content/10
-          px-4
-          py-24
-          sm:px-8
+          px-3
+          pb-6
+          pt-24
+          sm:px-6
+          sm:pb-8
+          sm:pt-28
+          lg:px-10
+          lg:pb-10
+          lg:pt-32
         "
       >
-
-
-        {/* ================= TWO PANELS ================= */}
+        {/* ===================================================
+            AUTH CARD
+        ==================================================== */}
 
         <div
           className="
+            relative
             flex
             w-full
-            max-w-6xl
+            max-w-[1180px]
             flex-col
             overflow-hidden
-            rounded-2xl
-            shadow-2xl
-            lg:h-[620px]
+            rounded-[1.5rem]
+            border
+            border-base-content/10
+            bg-base-100
+            shadow-[0_25px_80px_rgba(0,0,0,0.20)]
+            lg:min-h-[650px]
             lg:flex-row
+            lg:rounded-[2rem]
           "
         >
+          {/* =================================================
+              IMAGE PANEL
+          ================================================== */}
 
-
-          {/* ================= IMAGE PANEL ================= */}
-
-          <div
+          <section
             className="
               relative
-              h-[350px]
+              h-[300px]
               w-full
               overflow-hidden
-              lg:h-full
+              sm:h-[380px]
+              lg:h-auto
               lg:w-1/2
             "
           >
-
-            {/* Image */}
-
             <img
               src={AuthImage}
               alt="PC Building"
@@ -235,41 +329,55 @@ const AuthLayout = () => {
                 h-full
                 w-full
                 object-cover
+                transition-transform
+                duration-[1500ms]
+                hover:scale-105
               "
             />
 
-
-            {/* Black + Red Gradient */}
+            {/* DARK / RED OVERLAY */}
 
             <div
               className="
                 absolute
                 inset-0
                 bg-gradient-to-br
-                from-black/90
-                via-black/50
+                from-black/95
+                via-black/65
                 to-primary/70
               "
             />
 
-
-            {/* Red Glow */}
+            {/* RED LIGHT */}
 
             <div
               className="
                 absolute
-                -bottom-32
-                -left-32
-                h-[400px]
-                w-[400px]
+                -bottom-40
+                -left-40
+                h-[32rem]
+                w-[32rem]
                 rounded-full
-                bg-primary/30
-                blur-[100px]
+                bg-primary/25
+                blur-[120px]
               "
             />
 
+            {/* TOP LINE */}
 
-            {/* Image Text */}
+            <div
+              className="
+                absolute
+                left-0
+                right-0
+                top-0
+                h-1
+                bg-primary
+                shadow-[0_0_25px_rgba(229,9,47,0.8)]
+              "
+            />
+
+            {/* CONTENT */}
 
             <div
               className="
@@ -279,62 +387,62 @@ const AuthLayout = () => {
                 h-full
                 flex-col
                 justify-end
-                p-8
-                sm:p-10
+                p-6
+                sm:p-9
                 lg:p-12
               "
             >
+              {/* SMALL LABEL */}
 
-              <p
+              <div
                 className="
                   mb-3
-                  text-xs
-                  font-semibold
+                  flex
+                  items-center
+                  gap-2
+                  text-[10px]
+                  font-bold
                   uppercase
-                  tracking-[0.3em]
+                  tracking-[0.25em]
                   text-primary
-                  animate-[fadeUp_0.8s_ease-out]
+                  sm:text-xs
+                  sm:tracking-[0.3em]
                 "
               >
-                Build. Compare. Choose.
-              </p>
+                <span className="h-px w-7 bg-primary sm:w-10" />
 
+                Build. Compare. Choose.
+              </div>
+
+              {/* TITLE */}
 
               <h1
                 className="
-                  text-4xl
-                  font-extrabold
-                  leading-tight
+                  max-w-xl
+                  text-[clamp(2rem,4vw,4rem)]
+                  font-black
+                  leading-[1.05]
+                  tracking-tight
                   text-white
-                  sm:text-5xl
-                  animate-[fadeUp_1s_ease-out]
                 "
               >
-
                 Build Your
 
-                <span
-                  className="
-                    block
-                    text-primary
-                  "
-                >
+                <span className="block text-primary">
                   Dream PC.
                 </span>
-
               </h1>
 
+              {/* DESCRIPTION */}
 
               <p
                 className="
-                  mt-5
+                  mt-4
                   max-w-lg
-                  text-sm
-                  leading-6
+                  text-[clamp(0.75rem,1vw,1rem)]
+                  leading-relaxed
                   text-white/65
-                  sm:text-base
-                  sm:leading-7
-                  animate-[fadeUp_1.2s_ease-out]
+                  sm:mt-5
                 "
               >
                 Find the right components, compare prices,
@@ -342,29 +450,41 @@ const AuthLayout = () => {
                 needs, performance, and budget.
               </p>
 
+              {/* BOTTOM INFO */}
 
-              {/* Red Line */}
+              <div className="mt-6 flex items-center gap-3 sm:mt-8">
+                <div
+                  className="
+                    h-1
+                    w-12
+                    rounded-full
+                    bg-primary
+                    shadow-[0_0_20px_rgba(229,9,47,0.7)]
+                    sm:w-16
+                  "
+                />
 
-              <div
-                className="
-                  mt-6
-                  h-1
-                  w-20
-                  rounded-full
-                  bg-primary
-                  shadow-[0_0_20px_rgba(229,9,47,0.7)]
-                  animate-[expandLine_1.4s_ease-out]
-                "
-              />
-
+                <span
+                  className="
+                    text-[10px]
+                    font-semibold
+                    uppercase
+                    tracking-wider
+                    text-white/40
+                    sm:text-xs
+                  "
+                >
+                  Smart PC Building
+                </span>
+              </div>
             </div>
+          </section>
 
-          </div>
+          {/* =================================================
+              FORM PANEL
+          ================================================== */}
 
-
-          {/* ================= FORM PANEL ================= */}
-
-          <div
+          <section
             className="
               relative
               flex
@@ -373,36 +493,68 @@ const AuthLayout = () => {
               items-center
               justify-center
               bg-primary-content
-              p-8
-              sm:p-10
-              lg:h-full
+              px-5
+              py-10
+              sm:px-10
+              sm:py-12
+              lg:min-h-0
               lg:w-1/2
+              lg:px-12
+              xl:px-16
             "
           >
+            {/* DECORATION */}
 
             <div
               className="
+                pointer-events-none
+                absolute
+                right-0
+                top-0
+                h-40
+                w-40
+                rounded-full
+                bg-primary/5
+                blur-3xl
+              "
+            />
+
+            <div
+              className="
+                pointer-events-none
+                absolute
+                bottom-0
+                left-0
+                h-40
+                w-40
+                rounded-full
+                bg-primary/5
+                blur-3xl
+              "
+            />
+
+            {/* FORM */}
+
+            <div
+              className="
+                relative
+                z-10
                 w-full
                 max-w-md
-                animate-[fadeUp_0.8s_ease-out]
+                animate-[fadeUp_0.7s_ease-out]
               "
             >
-
               <Outlet />
-
             </div>
-
-          </div>
-
+          </section>
         </div>
+      </main>
 
-      </div>
-
-
-      {/* ================= ADMIN PASSWORD MODAL ================= */}
+      {/* =====================================================
+          ADMIN PASSWORD MODAL
+      ====================================================== */}
 
       {showAdminModal && (
-
         <div
           className="
             fixed
@@ -413,220 +565,300 @@ const AuthLayout = () => {
             justify-center
             bg-black/80
             px-4
-            backdrop-blur-sm
+            backdrop-blur-md
           "
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              closeAdminAccess();
+            }
+          }}
         >
-
           <div
             className="
+              relative
               w-full
-              max-w-md
+              max-w-[430px]
+              overflow-hidden
               rounded-2xl
               border
-              border-gray-800
-              bg-[#111]
-              p-7
-              shadow-2xl
+              border-white/10
+              bg-[#111111]
+              shadow-[0_30px_100px_rgba(0,0,0,0.6)]
+              animate-[modalIn_0.25s_ease-out]
             "
           >
-
-            {/* Icon */}
+            {/* RED TOP LINE */}
 
             <div
               className="
-                mx-auto
-                mb-5
-                flex
-                h-14
-                w-14
-                items-center
-                justify-center
-                rounded-xl
-                bg-primary/10
-                text-2xl
+                absolute
+                left-0
+                right-0
+                top-0
+                h-1
+                bg-primary
+                shadow-[0_0_20px_rgba(229,9,47,0.7)]
               "
-            >
-              🔐
-            </div>
+            />
 
+            <div className="p-6 sm:p-8">
+              {/* CLOSE */}
 
-            {/* Title */}
-
-            <h2
-              className="
-                text-center
-                text-2xl
-                font-bold
-                text-white
-              "
-            >
-              Admin Access
-            </h2>
-
-
-            <p
-              className="
-                mt-2
-                text-center
-                text-sm
-                text-gray-500
-              "
-            >
-              Enter the admin access password
-              to continue.
-            </p>
-
-
-            {/* Form */}
-
-            <form
-              onSubmit={handleAdminAccess}
-              className="mt-6"
-            >
-
-              <input
-                type="password"
-                value={adminPassword}
-                onChange={(e) => {
-
-                  setAdminPassword(
-                    e.target.value
-                  );
-
-                  setError("");
-
-                }}
-                placeholder="Enter access password"
-                autoFocus
+              <button
+                type="button"
+                onClick={closeAdminAccess}
                 className="
-                  input
-                  input-bordered
-                  w-full
-                  border-gray-700
-                  bg-[#0A0A0A]
-                  text-white
-                  placeholder:text-gray-600
-                  focus:border-primary
+                  absolute
+                  right-4
+                  top-4
+                  flex
+                  h-9
+                  w-9
+                  items-center
+                  justify-center
+                  rounded-lg
+                  text-gray-500
+                  transition-all
+                  hover:bg-white/5
+                  hover:text-white
+                  active:scale-95
                 "
-              />
+                aria-label="Close"
+              >
+                <FaTimes />
+              </button>
 
-
-              {/* Error */}
-
-              {error && (
-
-                <p
-                  className="
-                    mt-2
-                    text-sm
-                    text-red-500
-                  "
-                >
-                  {error}
-                </p>
-
-              )}
-
-
-              {/* Buttons */}
+              {/* ICON */}
 
               <div
                 className="
-                  mt-6
+                  mx-auto
                   flex
-                  gap-3
+                  h-16
+                  w-16
+                  items-center
+                  justify-center
+                  rounded-2xl
+                  border
+                  border-primary/20
+                  bg-primary/10
+                  text-primary
+                  shadow-[0_0_30px_rgba(229,9,47,0.08)]
                 "
               >
-
-                <button
-                  type="button"
-                  onClick={() => {
-
-                    setShowAdminModal(false);
-                    setAdminPassword("");
-                    setError("");
-
-                  }}
-                  className="
-                    btn
-                    flex-1
-                    border-gray-700
-                    bg-transparent
-                    text-gray-300
-                    hover:bg-gray-800
-                  "
-                >
-                  Cancel
-                </button>
-
-
-                <button
-                  type="submit"
-                  className="
-                    btn
-                    flex-1
-                    border-primary
-                    bg-primary
-                    text-white
-                    hover:bg-[#c70727]
-                  "
-                >
-                  Continue
-                </button>
-
+                <FaShieldAlt className="text-2xl" />
               </div>
 
-            </form>
+              {/* TITLE */}
 
+              <h2
+                className="
+                  mt-5
+                  text-center
+                  text-2xl
+                  font-extrabold
+                  tracking-tight
+                  text-white
+                "
+              >
+                Admin Access
+              </h2>
+
+              <p
+                className="
+                  mx-auto
+                  mt-2
+                  max-w-xs
+                  text-center
+                  text-sm
+                  leading-6
+                  text-gray-500
+                "
+              >
+                Enter your access password to
+                continue to the administration panel.
+              </p>
+
+              {/* FORM */}
+
+              <form
+                onSubmit={handleAdminAccess}
+                className="mt-6"
+              >
+                <label
+                  className="
+                    mb-2
+                    block
+                    text-xs
+                    font-bold
+                    uppercase
+                    tracking-wider
+                    text-gray-400
+                  "
+                >
+                  Access Password
+                </label>
+
+                <div className="relative">
+                  <FaLock
+                    className="
+                      pointer-events-none
+                      absolute
+                      left-4
+                      top-1/2
+                      -translate-y-1/2
+                      text-sm
+                      text-gray-600
+                    "
+                  />
+
+                  <input
+                    type="password"
+                    value={adminPassword}
+                    onChange={(e) => {
+                      setAdminPassword(e.target.value);
+                      setError("");
+                    }}
+                    placeholder="Enter access password"
+                    autoFocus
+                    className="
+                      h-12
+                      w-full
+                      rounded-xl
+                      border
+                      border-gray-800
+                      bg-[#0A0A0A]
+                      pl-11
+                      pr-4
+                      text-sm
+                      text-white
+                      outline-none
+                      transition-all
+                      placeholder:text-gray-600
+                      focus:border-primary
+                      focus:ring-2
+                      focus:ring-primary/10
+                    "
+                  />
+                </div>
+
+                {/* ERROR */}
+
+                {error && (
+                  <div
+                    className="
+                      mt-3
+                      rounded-lg
+                      border
+                      border-red-500/20
+                      bg-red-500/5
+                      px-3
+                      py-2
+                      text-xs
+                      font-medium
+                      text-red-400
+                    "
+                  >
+                    {error}
+                  </div>
+                )}
+
+                {/* BUTTONS */}
+
+                <div
+                  className="
+                    mt-6
+                    grid
+                    grid-cols-2
+                    gap-3
+                  "
+                >
+                  <button
+                    type="button"
+                    onClick={closeAdminAccess}
+                    className="
+                      h-12
+                      rounded-xl
+                      border
+                      border-gray-800
+                      bg-transparent
+                      px-4
+                      text-sm
+                      font-bold
+                      text-gray-400
+                      transition-all
+                      duration-200
+                      hover:border-gray-700
+                      hover:bg-white/5
+                      hover:text-white
+                      active:scale-[0.98]
+                    "
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="
+                      h-12
+                      rounded-xl
+                      border
+                      border-primary
+                      bg-primary
+                      px-4
+                      text-sm
+                      font-bold
+                      text-white
+                      shadow-[0_8px_25px_rgba(229,9,47,0.18)]
+                      transition-all
+                      duration-200
+                      hover:bg-[#c70727]
+                      hover:shadow-[0_10px_30px_rgba(229,9,47,0.3)]
+                      active:scale-[0.98]
+                    "
+                  >
+                    Continue
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-
         </div>
-
       )}
 
-
-      {/* ================= ANIMATIONS ================= */}
+      {/* =====================================================
+          ANIMATIONS
+      ====================================================== */}
 
       <style>
         {`
-
           @keyframes fadeUp {
-
             from {
               opacity: 0;
-              transform: translateY(30px);
+              transform: translateY(20px);
             }
 
             to {
               opacity: 1;
               transform: translateY(0);
             }
-
           }
 
-
-          @keyframes expandLine {
-
+          @keyframes modalIn {
             from {
-              width: 0;
               opacity: 0;
+              transform: translateY(15px) scale(0.97);
             }
 
             to {
-              width: 80px;
               opacity: 1;
+              transform: translateY(0) scale(1);
             }
-
           }
-
         `}
       </style>
-
     </div>
-
   );
-
 };
-
 
 export default AuthLayout;

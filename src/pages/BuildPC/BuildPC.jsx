@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import BuildHeader from "./BuildHeader/BuildHeader";
 import BuildQuestions from "./BuildQuestions/BuildQuestions";
 import BuildResult from "./BuildResult/BuildResult";
@@ -7,7 +8,7 @@ import useAuth from "../../hooks/useAuth";
 import useApi from "../../hooks/useApi";
 
 const BuildPC = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const api = useApi();
 
   const [step, setStep] = useState(1);
@@ -30,7 +31,6 @@ const BuildPC = () => {
   // null = unlimited
   // number = remaining builds
   // ==========================================
-
   const [buildLimit, setBuildLimit] = useState(null);
   const [limitLoading, setLimitLoading] = useState(true);
   const [limitError, setLimitError] = useState("");
@@ -38,7 +38,6 @@ const BuildPC = () => {
   // ==========================================
   // FIREBASE UID
   // ==========================================
-
   const firebaseId =
     user?.uid ||
     user?.firebase_id ||
@@ -47,60 +46,127 @@ const BuildPC = () => {
   // ==========================================
   // FETCH BUILD LIMIT
   // ==========================================
-
   useEffect(() => {
+    let cancelled = false;
+
     const fetchBuildLimit = async () => {
-      if (!firebaseId) {
-        setLimitLoading(false);
+      // ----------------------------------------
+      // Wait for Firebase auth initialization
+      // ----------------------------------------
+      if (authLoading) {
         return;
       }
 
-      try {
+      // ----------------------------------------
+      // Firebase finished but no user
+      // ----------------------------------------
+      if (!firebaseId) {
+        if (!cancelled) {
+          setBuildLimit(0);
+          setLimitError(
+            "You must be logged in to use the PC Builder."
+          );
+          setLimitLoading(false);
+        }
+
+        return;
+      }
+
+      // ----------------------------------------
+      // Start loading
+      // ----------------------------------------
+      if (!cancelled) {
         setLimitLoading(true);
         setLimitError("");
+      }
 
-        const response = await api.get(
-          `/api/build-limit/${firebaseId}`
-        );
+      // ----------------------------------------
+      // Retry backend request
+      // Useful for Render cold start
+      // ----------------------------------------
+      const maxAttempts = 3;
 
-        console.log(
-          "Build Limit Response:",
-          response.data
-        );
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        if (cancelled) return;
 
-        if (response.data?.success) {
-          if (response.data.unlimited === true) {
-            // Admin
-            setBuildLimit(null);
-          } else {
-            // Normal user
-            setBuildLimit(
-              response.data.build_limit ?? 0
-            );
+        try {
+          console.log(
+            `Checking build limit... Attempt ${attempt}/${maxAttempts}`
+          );
+
+          const response = await api.get(
+            `/api/build-limit/${firebaseId}`,
+            {
+              timeout: 30000,
+            }
+          );
+
+          console.log(
+            "Build Limit Response:",
+            response.data
+          );
+
+          if (cancelled) return;
+
+          if (response.data?.success) {
+            if (response.data.unlimited === true) {
+              // Admin
+              setBuildLimit(null);
+            } else {
+              // Normal user
+              setBuildLimit(
+                response.data.build_limit ?? 0
+              );
+            }
+
+            setLimitError("");
+            setLimitLoading(false);
+
+            return;
           }
-        }
-      } catch (err) {
-        console.error(
-          "Failed to load build limit:",
-          err
-        );
 
-        setLimitError(
-          err.response?.data?.detail ||
-            "Unable to load your build limit."
-        );
-      } finally {
-        setLimitLoading(false);
+          throw new Error(
+            "Invalid build limit response."
+          );
+        } catch (err) {
+          console.error(
+            `Build limit attempt ${attempt} failed:`,
+            err
+          );
+
+          if (attempt === maxAttempts) {
+            if (!cancelled) {
+              setLimitError(
+                err.response?.data?.detail ||
+                  "Unable to load your build limit. Please try again."
+              );
+
+              setLimitLoading(false);
+            }
+
+            return;
+          }
+
+          // --------------------------------------
+          // Wait before retry
+          // --------------------------------------
+          await new Promise((resolve) =>
+            setTimeout(resolve, 2000)
+          );
+        }
       }
     };
 
     fetchBuildLimit();
-  }, [firebaseId]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [firebaseId, authLoading]);
 
   // ==========================================
   // BUILD STATUS
   // ==========================================
-
   const isUnlimited = buildLimit === null;
 
   const canBuild =
@@ -111,7 +177,6 @@ const BuildPC = () => {
   // ==========================================
   // UPDATE REQUIREMENT
   // ==========================================
-
   const updateRequirement = (field, value) => {
     setRequirements((prev) => ({
       ...prev,
@@ -124,12 +189,12 @@ const BuildPC = () => {
   // ==========================================
   // NEXT STEP
   // ==========================================
-
   const nextStep = () => {
     if (!canBuild) {
       setError(
         "You have reached your build limit. Please contact an admin to get more builds."
       );
+
       return;
     }
 
@@ -141,7 +206,6 @@ const BuildPC = () => {
   // ==========================================
   // PREVIOUS STEP
   // ==========================================
-
   const previousStep = () => {
     if (step > 1) {
       setStep((prev) => prev - 1);
@@ -151,7 +215,6 @@ const BuildPC = () => {
   // ==========================================
   // CONVERT BUDGET
   // ==========================================
-
   const getBudgetNumber = (budgetText) => {
     if (!budgetText) {
       return 0;
@@ -187,7 +250,6 @@ const BuildPC = () => {
   // ==========================================
   // USE ONE BUILD
   // ==========================================
-
   const consumeBuild = async () => {
     if (!firebaseId) {
       throw new Error(
@@ -198,7 +260,6 @@ const BuildPC = () => {
     // ========================================
     // ADMIN / UNLIMITED
     // ========================================
-
     if (isUnlimited) {
       console.log(
         "Unlimited user. Build limit will not decrease."
@@ -214,7 +275,6 @@ const BuildPC = () => {
     // ========================================
     // SAFETY CHECK
     // ========================================
-
     if (buildLimit <= 0) {
       throw new Error(
         "You have reached your build limit."
@@ -224,7 +284,6 @@ const BuildPC = () => {
     // ========================================
     // DECREASE LIMIT
     // ========================================
-
     const response = await api.post(
       `/api/build-limit/${firebaseId}/use`
     );
@@ -243,7 +302,6 @@ const BuildPC = () => {
     // ========================================
     // UPDATE FRONTEND NUMBER
     // ========================================
-
     if (response.data.unlimited === true) {
       setBuildLimit(null);
     } else {
@@ -258,42 +316,36 @@ const BuildPC = () => {
   // ==========================================
   // GENERATE BUILD
   // ==========================================
-
   const generateBuild = async () => {
     try {
       setGenerating(true);
       setError("");
 
       // ========================================
-      // CHECK BUILD LIMIT
+      // CHECK AUTH
       // ========================================
-
-      if (!canBuild) {
-        setError(
-          "You have reached your build limit. Please contact an admin to get more builds."
-        );
-
-        setGenerating(false);
-        return;
-      }
-
-      // ========================================
-      // CHECK LOGIN
-      // ========================================
-
       if (!firebaseId) {
         setError(
           "Please login before generating a PC build."
         );
 
-        setGenerating(false);
+        return;
+      }
+
+      // ========================================
+      // CHECK BUILD LIMIT
+      // ========================================
+      if (!canBuild) {
+        setError(
+          "You have reached your build limit. Please contact an admin to get more builds."
+        );
+
         return;
       }
 
       // ========================================
       // VALIDATE BUDGET
       // ========================================
-
       const budgetNumber =
         getBudgetNumber(
           requirements.budget
@@ -304,14 +356,12 @@ const BuildPC = () => {
           "Please select a valid budget."
         );
 
-        setGenerating(false);
         return;
       }
 
       // ========================================
       // BUILD REQUEST
       // ========================================
-
       const requestData = {
         type: requirements.type,
         budget: budgetNumber,
@@ -328,7 +378,6 @@ const BuildPC = () => {
       // ========================================
       // CALL BUILD API
       // ========================================
-
       const response = await api.post(
         "/api/build-pc",
         requestData,
@@ -352,21 +401,17 @@ const BuildPC = () => {
       // CONSUME ONE BUILD
       // ONLY AFTER SUCCESS
       // ========================================
-
       await consumeBuild();
 
       // ========================================
       // SAVE BUILD DATA
       // ========================================
-
       setBuildData(response.data);
 
       // ========================================
       // SHOW RESULT
       // ========================================
-
       setGenerated(true);
-
     } catch (err) {
       console.error(
         "AI Build Error:",
@@ -379,7 +424,6 @@ const BuildPC = () => {
       // ========================================
       // FASTAPI ERROR
       // ========================================
-
       if (err.response?.data?.detail) {
         const detail =
           err.response.data.detail;
@@ -407,7 +451,6 @@ const BuildPC = () => {
       }
 
       setError(message);
-
     } finally {
       setGenerating(false);
     }
@@ -416,7 +459,6 @@ const BuildPC = () => {
   // ==========================================
   // START AGAIN
   // ==========================================
-
   const startAgain = () => {
     if (!canBuild) {
       setGenerated(false);
@@ -445,9 +487,113 @@ const BuildPC = () => {
   };
 
   // ==========================================
-  // LOADING SCREEN
+  // AUTH LOADING SCREEN
   // ==========================================
+  if (authLoading) {
+    return (
+      <section
+        className="
+          min-h-screen
+          bg-base-100
+          px-4
+          pb-16
+          pt-24
+          sm:px-6
+          sm:pt-28
+        "
+      >
+        <div className="mx-auto w-full max-w-6xl">
+          <BuildHeader step={1} />
 
+          <div
+            className="
+              mx-auto
+              mt-8
+              max-w-3xl
+              rounded-3xl
+              border
+              border-base-300
+              bg-base-100
+              p-10
+              text-center
+              shadow-lg
+              shadow-base-content/5
+              sm:p-16
+            "
+          >
+            <div
+              className="
+                mx-auto
+                flex
+                h-20
+                w-20
+                items-center
+                justify-center
+                rounded-full
+                bg-primary/5
+              "
+            >
+              <div
+                className="
+                  h-12
+                  w-12
+                  animate-spin
+                  rounded-full
+                  border-4
+                  border-base-300
+                  border-t-primary
+                "
+              />
+            </div>
+
+            <p
+              className="
+                mt-7
+                text-sm
+                font-black
+                uppercase
+                tracking-widest
+                text-primary
+              "
+            >
+              ThriftBuild
+            </p>
+
+            <h2
+              className="
+                mt-3
+                text-3xl
+                font-black
+                text-base-content
+                sm:text-4xl
+              "
+            >
+              Checking your account...
+            </h2>
+
+            <p
+              className="
+                mx-auto
+                mt-4
+                max-w-xl
+                text-sm
+                leading-6
+                text-base-content/60
+                sm:text-base
+              "
+            >
+              Please wait while we verify your
+              account.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // ==========================================
+  // GENERATING LOADING SCREEN
+  // ==========================================
   if (generating) {
     return (
       <section
@@ -462,7 +608,6 @@ const BuildPC = () => {
         "
       >
         <div className="mx-auto w-full max-w-6xl">
-
           <BuildHeader step={5} />
 
           <div
@@ -481,7 +626,6 @@ const BuildPC = () => {
               sm:p-16
             "
           >
-
             <div
               className="
                 mx-auto
@@ -549,7 +693,6 @@ const BuildPC = () => {
             </p>
 
             <div className="mx-auto mt-8 max-w-md">
-
               <div
                 className="
                   h-2
@@ -568,7 +711,6 @@ const BuildPC = () => {
                   "
                 />
               </div>
-
             </div>
 
             <p
@@ -581,9 +723,7 @@ const BuildPC = () => {
             >
               This may take a few seconds...
             </p>
-
           </div>
-
         </div>
       </section>
     );
@@ -592,7 +732,6 @@ const BuildPC = () => {
   // ==========================================
   // MAIN UI
   // ==========================================
-
   return (
     <section
       className="
@@ -605,9 +744,7 @@ const BuildPC = () => {
         sm:pt-28
       "
     >
-
       <div className="mx-auto w-full max-w-6xl">
-
         <BuildHeader
           step={generated ? 5 : step}
         />
@@ -615,13 +752,9 @@ const BuildPC = () => {
         {/* ======================================
             BUILD LIMIT
         ====================================== */}
-
         <div className="mx-auto mt-6 max-w-5xl">
-
           {/* LOADING */}
-
           {limitLoading && (
-
             <div
               className="
                 flex
@@ -637,7 +770,6 @@ const BuildPC = () => {
                 shadow-sm
               "
             >
-
               <span
                 className="
                   h-5
@@ -659,15 +791,11 @@ const BuildPC = () => {
               >
                 Checking your build limit...
               </span>
-
             </div>
-
           )}
 
           {/* ERROR */}
-
           {!limitLoading && limitError && (
-
             <div
               className="
                 rounded-2xl
@@ -682,16 +810,28 @@ const BuildPC = () => {
               "
             >
               {limitError}
-            </div>
 
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.reload();
+                }}
+                className="
+                  ml-3
+                  font-black
+                  underline
+                  underline-offset-2
+                "
+              >
+                Retry
+              </button>
+            </div>
           )}
 
           {/* UNLIMITED */}
-
           {!limitLoading &&
             !limitError &&
             isUnlimited && (
-
               <div
                 className="
                   relative
@@ -705,7 +845,6 @@ const BuildPC = () => {
                   shadow-sm
                 "
               >
-
                 <div
                   className="
                     flex
@@ -713,7 +852,6 @@ const BuildPC = () => {
                     gap-4
                   "
                 >
-
                   <div
                     className="
                       flex
@@ -733,7 +871,6 @@ const BuildPC = () => {
                   </div>
 
                   <div>
-
                     <p
                       className="
                         text-xs
@@ -767,22 +904,16 @@ const BuildPC = () => {
                       You can generate as many PC
                       builds as you need.
                     </p>
-
                   </div>
-
                 </div>
-
               </div>
-
             )}
 
           {/* USER WITH BUILDS */}
-
           {!limitLoading &&
             !limitError &&
             !isUnlimited &&
             buildLimit > 0 && (
-
               <div
                 className="
                   relative
@@ -796,7 +927,6 @@ const BuildPC = () => {
                   shadow-sm
                 "
               >
-
                 <div
                   className="
                     flex
@@ -805,7 +935,6 @@ const BuildPC = () => {
                     gap-4
                   "
                 >
-
                   <div
                     className="
                       flex
@@ -814,7 +943,6 @@ const BuildPC = () => {
                       gap-4
                     "
                   >
-
                     <div
                       className="
                         flex
@@ -834,7 +962,6 @@ const BuildPC = () => {
                     </div>
 
                     <div>
-
                       <p
                         className="
                           text-xs
@@ -872,9 +999,7 @@ const BuildPC = () => {
                         Each successful build uses
                         one build credit.
                       </p>
-
                     </div>
-
                   </div>
 
                   <div
@@ -892,20 +1017,15 @@ const BuildPC = () => {
                   >
                     {buildLimit} left
                   </div>
-
                 </div>
-
               </div>
-
             )}
 
           {/* ZERO */}
-
           {!limitLoading &&
             !limitError &&
             !isUnlimited &&
             buildLimit <= 0 && (
-
               <div
                 className="
                   relative
@@ -919,7 +1039,6 @@ const BuildPC = () => {
                   shadow-sm
                 "
               >
-
                 <div
                   className="
                     flex
@@ -927,7 +1046,6 @@ const BuildPC = () => {
                     gap-4
                   "
                 >
-
                   <div
                     className="
                       flex
@@ -947,7 +1065,6 @@ const BuildPC = () => {
                   </div>
 
                   <div>
-
                     <p
                       className="
                         text-xs
@@ -984,23 +1101,16 @@ const BuildPC = () => {
                       an administrator to increase your
                       build limit.
                     </p>
-
                   </div>
-
                 </div>
-
               </div>
-
             )}
-
         </div>
 
         {/* ======================================
             GENERAL ERROR
         ====================================== */}
-
         {error && !generated && (
-
           <div
             className="
               mx-auto
@@ -1019,19 +1129,14 @@ const BuildPC = () => {
           >
             {error}
           </div>
-
         )}
 
         {/* ======================================
             BUILDER / RESULT
         ====================================== */}
-
         {!limitLoading &&
         !limitError &&
         !canBuild ? (
-
-          /* BLOCKED */
-
           <div
             className="
               mx-auto
@@ -1047,7 +1152,6 @@ const BuildPC = () => {
               sm:p-12
             "
           >
-
             <div
               className="
                 mx-auto
@@ -1111,11 +1215,8 @@ const BuildPC = () => {
             >
               0 builds remaining
             </div>
-
           </div>
-
         ) : !generated ? (
-
           <BuildQuestions
             step={step}
             requirements={requirements}
@@ -1124,19 +1225,14 @@ const BuildPC = () => {
             previousStep={previousStep}
             generateBuild={generateBuild}
           />
-
         ) : (
-
           <BuildResult
             requirements={requirements}
             buildData={buildData}
             buildAgain={startAgain}
           />
-
         )}
-
       </div>
-
     </section>
   );
 };

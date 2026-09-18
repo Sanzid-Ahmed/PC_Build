@@ -58,11 +58,11 @@ export const router = createBrowserRouter([
         Component: Register
       },
       {
-        path: "/admin/login",
+        path: "admin/login",
         element: <AdminLogin />,
       },
       {
-        path: "/admin/register",
+        path: "admin/register",
         element: <AdminRegister />,
       }
     ]

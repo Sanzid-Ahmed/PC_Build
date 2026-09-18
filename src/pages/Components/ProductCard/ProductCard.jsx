@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+
 import {
   FaMicrochip,
   FaShoppingCart,
@@ -7,11 +8,12 @@ import {
   FaStore,
   FaExternalLinkAlt,
 } from "react-icons/fa";
-import { useCart } from "../../../hooks/useCart";
 
+import { useCart } from "../../../hooks/useCart";
 
 const ProductCard = ({ product }) => {
   const [imageError, setImageError] = useState(false);
+
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
@@ -19,31 +21,40 @@ const ProductCard = ({ product }) => {
      PARSE IMAGES
   ===================================================== */
 
-  let images = product.images;
+  const image = useMemo(() => {
+    let images = product?.images;
 
-  if (typeof images === "string") {
-    try {
-      images = JSON.parse(images);
-    } catch {
-      images = [];
+    if (typeof images === "string") {
+      try {
+        images = JSON.parse(images);
+      } catch {
+        images = [];
+      }
     }
-  }
 
-  const image =
-    Array.isArray(images) && images.length > 0 ? images[0] : null;
+    if (Array.isArray(images) && images.length > 0) {
+      return images[0];
+    }
+
+    return null;
+  }, [product?.images]);
 
   /* =====================================================
      PRICE
   ===================================================== */
 
-  const price = product.numericPrice;
+  const price = Number(
+    product?.numericPrice ?? product?.price ?? 0
+  );
 
   /* =====================================================
      OLD PRICE
   ===================================================== */
 
   const oldPrice =
-    product.old_price !== null && product.old_price !== undefined
+    product?.old_price !== null &&
+    product?.old_price !== undefined &&
+    product?.old_price !== ""
       ? Number(product.old_price)
       : null;
 
@@ -52,10 +63,14 @@ const ProductCard = ({ product }) => {
   ===================================================== */
 
   const hasDiscount =
-    oldPrice !== null && oldPrice > 0 && oldPrice > price;
+    oldPrice !== null &&
+    oldPrice > 0 &&
+    oldPrice > price;
 
   const discount = hasDiscount
-    ? Math.round(((oldPrice - price) / oldPrice) * 100)
+    ? Math.round(
+        ((oldPrice - price) / oldPrice) * 100
+      )
     : 0;
 
   /* =====================================================
@@ -66,139 +81,196 @@ const ProductCard = ({ product }) => {
     addToCart(product);
   };
 
+  /* =====================================================
+     VIEW DETAILS
+  ===================================================== */
+
+  const handleViewDetails = () => {
+    navigate(`/product/${product.id}`);
+  };
+
+  /* =====================================================
+     RENDER
+  ===================================================== */
+
   return (
-    <div
+    <article
       className="
         group
         flex
         h-full
         min-w-0
+        w-full
         flex-col
+
         overflow-hidden
-        rounded-2xl
+
+        rounded-[clamp(0.75rem,1vw,1.25rem)]
+
         border
         border-base-300
+
         bg-base-100
+
         shadow-sm
+
         transition-all
         duration-300
+
         hover:-translate-y-1
         hover:border-primary/30
         hover:shadow-lg
       "
     >
-      {/* ================= IMAGE ================= */}
+      {/* =================================================
+          IMAGE
+      ================================================= */}
 
       <div
         className="
           relative
           flex
-          h-48
+          w-full
           shrink-0
           items-center
           justify-center
           overflow-hidden
+
           bg-base-200
-          p-4
-          sm:h-52
-          sm:p-5
+
+          h-[clamp(10rem,14vw,13rem)]
+
+          p-[clamp(0.6rem,1vw,1.25rem)]
         "
       >
-        {/* DISCOUNT */}
+        {/* =================================================
+            DISCOUNT BADGE
+        ================================================= */}
 
         {hasDiscount && (
           <div
             className="
               absolute
-              left-3
-              top-3
+              left-[clamp(0.5rem,0.8vw,0.75rem)]
+              top-[clamp(0.5rem,0.8vw,0.75rem)]
+
               z-10
+
               rounded-full
+
               bg-primary
-              px-2.5
-              py-1
-              text-[10px]
+
+              px-[clamp(0.4rem,0.6vw,0.7rem)]
+              py-[clamp(0.2rem,0.35vw,0.3rem)]
+
+              text-[clamp(0.5rem,0.65vw,0.7rem)]
               font-bold
+
               text-primary-content
+
               shadow-sm
-              sm:px-3
-              sm:text-xs
             "
           >
             -{discount}%
           </div>
         )}
 
-        {/* CATEGORY */}
+        {/* =================================================
+            CATEGORY BADGE
+        ================================================= */}
 
-        {product.category && (
+        {product?.category && (
           <div
+            title={product.category}
             className="
               absolute
-              right-3
-              top-3
+              right-[clamp(0.5rem,0.8vw,0.75rem)]
+              top-[clamp(0.5rem,0.8vw,0.75rem)]
+
               z-10
+
               max-w-[55%]
+
               truncate
+
               rounded-full
+
               border
               border-base-300
+
               bg-base-100
-              px-2.5
-              py-1
-              text-[10px]
+
+              px-[clamp(0.4rem,0.6vw,0.7rem)]
+              py-[clamp(0.2rem,0.35vw,0.3rem)]
+
+              text-[clamp(0.5rem,0.65vw,0.7rem)]
               font-semibold
+
               text-primary
+
               shadow-sm
-              sm:px-3
-              sm:text-xs
             "
           >
             {product.category}
           </div>
         )}
 
-        {/* PRODUCT IMAGE */}
+        {/* =================================================
+            PRODUCT IMAGE
+        ================================================= */}
 
         {image && !imageError ? (
           <img
             src={image}
-            alt={product.name}
+            alt={product?.name || "Product"}
+            loading="lazy"
+            decoding="async"
+            onError={() => setImageError(true)}
             className="
               h-full
               w-full
               max-w-full
+
               object-contain
+
               transition-transform
               duration-500
+
               group-hover:scale-105
             "
-            loading="lazy"
-            decoding="async"
-            onError={() => setImageError(true)}
           />
         ) : (
           <div
             className="
               flex
-              h-20
-              w-20
+
+              h-[clamp(4rem,6vw,6rem)]
+              w-[clamp(4rem,6vw,6rem)]
+
               items-center
               justify-center
-              rounded-2xl
+
+              rounded-[clamp(0.75rem,1vw,1rem)]
+
               bg-base-100
+
               text-primary
+
               shadow-sm
-              sm:h-24
-              sm:w-24
             "
           >
-            <FaMicrochip className="text-3xl sm:text-4xl" />
+            <FaMicrochip
+              className="
+                text-[clamp(2rem,3vw,3rem)]
+              "
+            />
           </div>
         )}
       </div>
 
-      {/* ================= INFORMATION ================= */}
+      {/* =================================================
+          INFORMATION
+      ================================================= */}
 
       <div
         className="
@@ -206,223 +278,322 @@ const ProductCard = ({ product }) => {
           min-w-0
           flex-1
           flex-col
-          p-4
-          sm:p-5
+
+          p-[clamp(0.7rem,1vw,1.15rem)]
         "
       >
-        {/* ================= STORE ================= */}
+        {/* =================================================
+            STORE
+        ================================================= */}
 
         <div
           className="
-            mb-2
             flex
             min-w-0
             items-center
-            gap-2
-            text-xs
+
+            gap-[clamp(0.3rem,0.5vw,0.5rem)]
+
+            text-[clamp(0.58rem,0.7vw,0.75rem)]
+
             font-semibold
+
             text-primary
           "
         >
           <FaStore className="shrink-0" />
 
-          <span className="min-w-0 truncate">
-            {product.store || "Unknown Store"}
+          <span
+            title={product?.store || "Unknown Store"}
+            className="
+              min-w-0
+              truncate
+            "
+          >
+            {product?.store || "Unknown Store"}
           </span>
         </div>
 
-        {/* ================= NAME ================= */}
+        {/* =================================================
+            PRODUCT NAME
+        ================================================= */}
 
         <h3
+          title={product?.name || ""}
           className="
+            mt-[clamp(0.35rem,0.6vw,0.65rem)]
+
+            min-h-[clamp(2.35rem,3vw,3rem)]
+
             line-clamp-2
-            min-h-[44px]
+
             break-words
-            text-sm
+
+            text-[clamp(0.75rem,0.9vw,1rem)]
+
             font-bold
-            leading-5
+
+            leading-[1.4]
+
             text-base-content
-            sm:min-h-[48px]
-            sm:text-base
-            sm:leading-6
           "
         >
-          {product.name}
+          {product?.name || "Unnamed Product"}
         </h3>
 
-        {/* ================= BRAND ================= */}
+        {/* =================================================
+            BRAND
+        ================================================= */}
 
-        {product.brand && (
+        {product?.brand && (
           <p
             className="
-              mt-2
+              mt-[clamp(0.35rem,0.6vw,0.6rem)]
+
               truncate
-              text-xs
+
+              text-[clamp(0.58rem,0.7vw,0.75rem)]
+
               text-base-content/60
             "
           >
             Brand:{" "}
+
             <span className="font-semibold text-base-content">
               {product.brand}
             </span>
           </p>
         )}
 
-        {/* ================= RATING ================= */}
+        {/* =================================================
+            RATING
+        ================================================= */}
 
-        {product.rating && (
-          <div className="mt-3 flex items-center gap-1 text-sm">
-            <FaStar className="text-warning" />
-
-            <span className="font-semibold text-base-content">
-              {product.rating}
-            </span>
-
-            <span className="text-xs text-base-content/50">
-              ({product.reviews || 0})
-            </span>
-          </div>
-        )}
-
-        {/* ================= PRICE ================= */}
-
-        <div className="mt-auto pt-5">
-          <div className="flex min-w-0 flex-wrap items-end gap-2">
-            <span
+        {product?.rating !== null &&
+          product?.rating !== undefined &&
+          product?.rating !== "" && (
+            <div
               className="
-                truncate
-                text-xl
-                font-extrabold
-                text-primary
-                sm:text-2xl
+                mt-[clamp(0.45rem,0.7vw,0.7rem)]
+
+                flex
+                min-w-0
+                items-center
+
+                gap-[clamp(0.2rem,0.4vw,0.4rem)]
+
+                text-[clamp(0.65rem,0.8vw,0.85rem)]
               "
             >
-              ৳ {price.toLocaleString()}
+              <FaStar
+                className="
+                  shrink-0
+                  text-warning
+                "
+              />
+
+              <span
+                className="
+                  font-semibold
+                  text-base-content
+                "
+              >
+                {product.rating}
+              </span>
+
+              <span
+                className="
+                  truncate
+                  text-[clamp(0.55rem,0.65vw,0.7rem)]
+                  text-base-content/50
+                "
+              >
+                ({product.reviews || 0})
+              </span>
+            </div>
+          )}
+
+        {/* =================================================
+            PRICE + BUTTONS
+        ================================================= */}
+
+        <div
+          className="
+            mt-auto
+
+            pt-[clamp(0.75rem,1.2vw,1.25rem)]
+          "
+        >
+          {/* =================================================
+              PRICE
+          ================================================= */}
+
+          <div
+            className="
+              flex
+              min-w-0
+              flex-wrap
+              items-end
+
+              gap-x-[clamp(0.35rem,0.7vw,0.7rem)]
+              gap-y-1
+            "
+          >
+            <span
+              className="
+                min-w-0
+
+                text-[clamp(1rem,1.5vw,1.4rem)]
+
+                font-extrabold
+
+                leading-none
+
+                text-primary
+              "
+            >
+              ৳ {price.toLocaleString("en-BD")}
             </span>
 
             {hasDiscount && (
               <span
                 className="
                   mb-0.5
-                  text-xs
+
+                  text-[clamp(0.6rem,0.75vw,0.8rem)]
+
                   text-base-content/50
+
                   line-through
-                  sm:mb-1
-                  sm:text-sm
                 "
               >
-                ৳ {oldPrice.toLocaleString()}
+                ৳ {oldPrice.toLocaleString("en-BD")}
               </span>
             )}
           </div>
 
-          {/* ================= BUTTONS ================= */}
+          {/* =================================================
+              BUTTONS
+
+              IMPORTANT:
+              - Details gets flexible width
+              - Cart stays fixed
+              - Details text NEVER truncates
+          ================================================= */}
 
           <div
             className="
-              mt-4
-              grid
-              grid-cols-[minmax(0,1fr)_auto]
-              gap-2
+              mt-[clamp(0.6rem,0.9vw,1rem)]
+
+              flex
+              min-w-0
+              w-full
+
+              gap-[clamp(0.35rem,0.6vw,0.6rem)]
             "
           >
-            {/* VIEW DETAILS */}
+            {/* =================================================
+                VIEW DETAILS
+            ================================================= */}
 
-            {product.url ? (
-              <a
-                // href={product.url}
-                onClick={() => navigate(`/product/${product.id}`)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="
-                  flex
-                  min-w-0
-                  items-center
-                  justify-center
-                  gap-1.5
-                  rounded-xl
-                  bg-primary
-                  px-2
-                  py-3
-                  text-xs
-                  font-bold
-                  text-primary-content
-                  transition-all
-                  duration-200
-                  hover:bg-accent
-                  hover:shadow-md
-                  sm:gap-2
-                  sm:px-4
-                  sm:text-sm
-                "
-              >
-                <span className="truncate">
-                  View Details
-                </span>
+            <button
+              type="button"
+              onClick={handleViewDetails}
+              className="
+                flex
+                min-w-0
+                flex-1
 
-                <FaExternalLinkAlt
-                  className="
-                    shrink-0
-                    text-[9px]
-                    sm:text-xs
-                  "
-                />
-              </a>
-            ) : (
-              <button
-                disabled
-                className="
-                  rounded-xl
-                  bg-primary
-                  px-2
-                  py-3
-                  text-xs
-                  font-bold
-                  text-primary-content
-                  opacity-50
-                  sm:px-4
-                  sm:text-sm
-                "
-                onClick={() => navigate(`/product/${product.id}`)}
-              >
+                items-center
+                justify-center
+
+                gap-[clamp(0.25rem,0.4vw,0.45rem)]
+
+                rounded-xl
+
+                bg-primary
+
+                px-[clamp(0.4rem,0.7vw,0.8rem)]
+                py-[clamp(0.6rem,0.8vw,0.75rem)]
+
+                text-[clamp(0.6rem,0.75vw,0.82rem)]
+
+                font-bold
+
+                whitespace-nowrap
+
+                text-primary-content
+
+                transition-all
+                duration-200
+
+                hover:bg-accent
+                hover:shadow-md
+
+                active:scale-[0.98]
+              "
+            >
+              <span className="whitespace-nowrap">
                 View Details
-              </button>
-            )}
+              </span>
 
-            {/* ADD TO CART */}
+              <FaExternalLinkAlt
+                className="
+                  shrink-0
+
+                  text-[clamp(0.5rem,0.65vw,0.7rem)]
+                "
+              />
+            </button>
+
+            {/* =================================================
+                ADD TO CART
+            ================================================= */}
 
             <button
               type="button"
               title="Add to cart"
+              aria-label="Add to cart"
               onClick={handleAddToCart}
               className="
                 flex
-                h-11
-                w-11
+                h-[clamp(2.5rem,3.2vw,3rem)]
+                w-[clamp(2.5rem,3.2vw,3rem)]
+
                 shrink-0
+
                 items-center
                 justify-center
+
                 rounded-xl
+
                 border
                 border-primary
+
                 bg-base-100
+
                 text-primary
+
                 transition-all
                 duration-200
+
                 hover:bg-primary
                 hover:text-primary-content
                 hover:shadow-md
+
                 active:scale-95
-                sm:h-12
-                sm:w-12
               "
             >
-              <FaShoppingCart />
+              <FaShoppingCart
+                className="
+                  text-[clamp(0.75rem,1vw,1rem)]
+                "
+              />
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 

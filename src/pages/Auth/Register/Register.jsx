@@ -1,13 +1,14 @@
 /* eslint-disable no-useless-escape */
 /* eslint-disable no-unused-vars */
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import useAuth from "../../../hooks/useAuth";
 import useApi from "../../../hooks/useApi";
 
 import { Link, useLocation, useNavigate } from "react-router";
+
 import SocialLogin from "../SocialLogin/SocialLogin";
 
 import axios from "axios";
@@ -26,11 +27,23 @@ const Register = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [registering, setRegistering] = useState(false);
+  const [registerError, setRegisterError] = useState("");
+
+  // =====================================================
+  // HANDLE REGISTRATION
+  // =====================================================
+
   const handleRegistration = async (data) => {
+    if (registering) return;
+
+    setRegistering(true);
+    setRegisterError("");
+
     try {
-      // ==========================================
-      // 1. Register user in Firebase
-      // ==========================================
+      // =================================================
+      // 1. CREATE FIREBASE USER
+      // =================================================
 
       const result = await registerUser(
         data.email,
@@ -41,83 +54,114 @@ const Register = () => {
 
       console.log("Firebase User:", firebaseUser);
 
-      // ==========================================
-      // 2. Upload profile image to ImgBB
-      // ==========================================
+      // =================================================
+      // 2. UPLOAD IMAGE
+      // =================================================
 
-      const profileImg = data.photo[0];
+      const profileImg = data.photo?.[0];
 
-      const formData = new FormData();
-      formData.append("image", profileImg);
+      let imageURL = "";
 
-      const image_API_URL = `https://api.imgbb.com/1/upload?key=${
-        import.meta.env.VITE_image_host_key
-      }`;
+      if (profileImg) {
+        const formData = new FormData();
 
-      const imageResponse = await axios.post(
-        image_API_URL,
-        formData
-      );
+        formData.append("image", profileImg);
 
-      const imageURL = imageResponse.data.data.url;
+        const image_API_URL = `https://api.imgbb.com/1/upload?key=${
+          import.meta.env.VITE_image_host_key
+        }`;
 
-      console.log("Uploaded Image:", imageURL);
+        const imageResponse = await axios.post(
+          image_API_URL,
+          formData
+        );
 
-      // ==========================================
-      // 3. Update Firebase profile
-      // ==========================================
+        imageURL = imageResponse.data.data.url;
 
-      const userProfile = {
+        console.log("Uploaded Image:", imageURL);
+      }
+
+      // =================================================
+      // 3. UPDATE FIREBASE PROFILE
+      // =================================================
+
+      await updateUserProfile({
         displayName: data.name,
         photoURL: imageURL,
-      };
+      });
 
-      await updateUserProfile(userProfile);
+      console.log("Firebase profile updated.");
 
-      // ==========================================
-      // 4. Get Firebase ID Token
-      // ==========================================
+      // =================================================
+      // 4. GET FIREBASE TOKEN
+      // =================================================
 
       const token = await firebaseUser.getIdToken();
 
-      // ==========================================
-      // 5. Send user data to Backend
-      // ==========================================
+      // =================================================
+      // 5. PREPARE BACKEND DATA
+      // =================================================
 
       const backendData = {
         firebase_id: firebaseUser.uid,
         email: firebaseUser.email,
         name: data.name,
-
-        // User account
         role: "user",
-
-        // Normal users get 10 builds
         build_limit: 10,
       };
 
-      console.log("Sending to Backend:", backendData);
-
-      const response = await api.post(
-        "/api/users/sync",
-        backendData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
       console.log(
-        "Backend Response:",
-        response.data
+        "Sending to Backend:",
+        backendData
       );
 
-      // ==========================================
-      // 6. Navigate
-      // ==========================================
+      // =================================================
+      // 6. START BACKEND SYNC
+      // =================================================
+      //
+      // IMPORTANT:
+      // We don't make the user wait for Render.
+      //
+      // The request starts here and navigation happens
+      // immediately afterward.
+      //
+      // =================================================
 
-      navigate(location.state || "/");
+      api
+        .post(
+          "/api/users/sync",
+          backendData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((response) => {
+          console.log(
+            "Backend Response:",
+            response.data
+          );
+        })
+        .catch((error) => {
+          console.error(
+            "Backend Sync Failed:",
+            error.response?.data || error.message
+          );
+        });
+
+      // =================================================
+      // 7. NAVIGATE IMMEDIATELY
+      // =================================================
+
+      const redirectPath =
+        location.state?.from?.pathname ||
+        location.state?.pathname ||
+        "/";
+
+      navigate(redirectPath, {
+        replace: true,
+      });
 
     } catch (error) {
       console.error(
@@ -125,21 +169,57 @@ const Register = () => {
         error
       );
 
-      if (error?.response) {
-        console.error(
-          "Backend Error:",
-          error.response.data
+      // =================================================
+      // FIREBASE ERRORS
+      // =================================================
+
+      if (
+        error?.code ===
+        "auth/email-already-in-use"
+      ) {
+        setRegisterError(
+          "This email is already registered. Please login instead."
+        );
+      } else if (
+        error?.code ===
+        "auth/invalid-email"
+      ) {
+        setRegisterError(
+          "Please enter a valid email address."
+        );
+      } else if (
+        error?.code ===
+        "auth/weak-password"
+      ) {
+        setRegisterError(
+          "Your password is too weak. Please use a stronger password."
+        );
+      } else if (
+        error?.code ===
+        "auth/network-request-failed"
+      ) {
+        setRegisterError(
+          "Network error. Please check your internet connection and try again."
+        );
+      } else if (error?.response) {
+        setRegisterError(
+          error.response.data?.detail ||
+            "Unable to create your account."
+        );
+      } else {
+        setRegisterError(
+          error?.message ||
+            "Registration failed. Please try again."
         );
       }
 
-      if (error?.code) {
-        console.error(
-          "Firebase Error:",
-          error.code
-        );
-      }
+      setRegistering(false);
     }
   };
+
+  // =====================================================
+  // UI
+  // =====================================================
 
   return (
     <div className="w-full">
@@ -154,9 +234,13 @@ const Register = () => {
           sm:p-7
         "
       >
-        {/* Header */}
+
+        {/* ============================================
+            HEADER
+        ============================================ */}
 
         <div className="mb-6 text-center">
+
           <h3
             className="
               text-3xl
@@ -177,19 +261,55 @@ const Register = () => {
           >
             Create your account to start building
           </p>
+
         </div>
 
-        {/* Registration Form */}
+        {/* ============================================
+            ERROR
+        ============================================ */}
+
+        {registerError && (
+          <div
+            className="
+              mb-5
+              rounded-xl
+              border
+              border-error/20
+              bg-error/5
+              px-4
+              py-3
+              text-sm
+              font-semibold
+              leading-5
+              text-error
+            "
+          >
+            {registerError}
+          </div>
+        )}
+
+        {/* ============================================
+            REGISTRATION FORM
+        ============================================ */}
 
         <form
-          onSubmit={handleSubmit(handleRegistration)}
+          onSubmit={handleSubmit(
+            handleRegistration
+          )}
           className="space-y-4"
         >
-          <fieldset className="space-y-4">
 
-            {/* Name */}
+          <fieldset
+            disabled={registering}
+            className="space-y-4"
+          >
+
+            {/* ========================================
+                NAME
+            ======================================== */}
 
             <div>
+
               <label
                 htmlFor="name"
                 className="
@@ -224,16 +344,21 @@ const Register = () => {
                 "
               />
 
-              {errors.name?.type === "required" && (
+              {errors.name?.type ===
+                "required" && (
                 <p className="mt-1.5 text-xs font-medium text-error">
                   Name is required.
                 </p>
               )}
+
             </div>
 
-            {/* Photo */}
+            {/* ========================================
+                PHOTO
+            ======================================== */}
 
             <div>
+
               <label
                 htmlFor="photo"
                 className="
@@ -256,11 +381,11 @@ const Register = () => {
                 })}
                 className="
                   file-input
+                  file-input-sm
                   w-full
                   border-base-300
                   bg-base-100
                   text-base-content
-                  file-input-sm
                   focus:border-primary
                   focus:outline-none
                   focus:ring-2
@@ -268,16 +393,21 @@ const Register = () => {
                 "
               />
 
-              {errors.photo?.type === "required" && (
+              {errors.photo?.type ===
+                "required" && (
                 <p className="mt-1.5 text-xs font-medium text-error">
                   Profile photo is required.
                 </p>
               )}
+
             </div>
 
-            {/* Email */}
+            {/* ========================================
+                EMAIL
+            ======================================== */}
 
             <div>
+
               <label
                 htmlFor="email"
                 className="
@@ -312,16 +442,21 @@ const Register = () => {
                 "
               />
 
-              {errors.email?.type === "required" && (
+              {errors.email?.type ===
+                "required" && (
                 <p className="mt-1.5 text-xs font-medium text-error">
                   Email is required.
                 </p>
               )}
+
             </div>
 
-            {/* Password */}
+            {/* ========================================
+                PASSWORD
+            ======================================== */}
 
             <div>
+
               <label
                 htmlFor="password"
                 className="
@@ -343,7 +478,7 @@ const Register = () => {
                   required: true,
                   minLength: 6,
                   pattern:
-                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]).{6,}$/,
+                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{};':"\\|,.<>/?]).{6,}$/,
                 })}
                 className="
                   input
@@ -359,27 +494,43 @@ const Register = () => {
                 "
               />
 
-              {errors.password?.type === "required" && (
+              {errors.password?.type ===
+                "required" && (
                 <p className="mt-1.5 text-xs font-medium text-error">
                   Password is required.
                 </p>
               )}
 
-              {errors.password?.type === "minLength" && (
+              {errors.password?.type ===
+                "minLength" && (
                 <p className="mt-1.5 text-xs font-medium text-error">
                   Password must be 6 characters or longer.
                 </p>
               )}
 
-              {errors.password?.type === "pattern" && (
-                <p className="mt-1.5 text-xs font-medium leading-5 text-error">
-                  Password must contain at least one uppercase letter,
-                  one lowercase letter, one number, and one special character.
+              {errors.password?.type ===
+                "pattern" && (
+                <p
+                  className="
+                    mt-1.5
+                    text-xs
+                    font-medium
+                    leading-5
+                    text-error
+                  "
+                >
+                  Password must contain at least one
+                  uppercase letter, one lowercase
+                  letter, one number, and one special
+                  character.
                 </p>
               )}
+
             </div>
 
-            {/* Register Button */}
+            {/* ========================================
+                REGISTER BUTTON
+            ======================================== */}
 
             <button
               type="submit"
@@ -394,13 +545,27 @@ const Register = () => {
                 duration-200
                 hover:bg-accent
                 hover:shadow-lg
+                disabled:cursor-not-allowed
+                disabled:opacity-70
               "
             >
-              Register
+
+              {registering ? (
+                <>
+                  <span className="loading loading-spinner loading-sm" />
+                  Creating account...
+                </>
+              ) : (
+                "Register"
+              )}
+
             </button>
+
           </fieldset>
 
-          {/* Login Link */}
+          {/* ==========================================
+              LOGIN LINK
+          ========================================== */}
 
           <p
             className="
@@ -424,14 +589,19 @@ const Register = () => {
             >
               Login
             </Link>
+
           </p>
+
         </form>
 
-        {/* Social Login */}
+        {/* ============================================
+            SOCIAL LOGIN
+        ============================================ */}
 
         <div className="mt-6">
           <SocialLogin role="user" />
         </div>
+
       </div>
     </div>
   );

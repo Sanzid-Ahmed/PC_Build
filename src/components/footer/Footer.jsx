@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 
 import { FiArrowUpRight } from "react-icons/fi";
+import { Link, Links } from "react-router";
 
 const Footer = () => {
   return (
@@ -164,8 +165,8 @@ const Footer = () => {
             <ul className="mt-5 space-y-3 text-sm">
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/"
                   className="
                     group flex items-center gap-1
                     text-white/55
@@ -183,12 +184,12 @@ const Footer = () => {
                       group-hover:opacity-100
                     "
                   />
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/build-pc"
                   className="
                     group flex items-center gap-1
                     text-white/55
@@ -206,12 +207,12 @@ const Footer = () => {
                       group-hover:opacity-100
                     "
                   />
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/components"
                   className="
                     group flex items-center gap-1
                     text-white/55
@@ -229,12 +230,12 @@ const Footer = () => {
                       group-hover:opacity-100
                     "
                   />
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/components"
                   className="
                     group flex items-center gap-1
                     text-white/55
@@ -252,12 +253,12 @@ const Footer = () => {
                       group-hover:opacity-100
                     "
                   />
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="about-us"
                   className="
                     group flex items-center gap-1
                     text-white/55
@@ -275,7 +276,7 @@ const Footer = () => {
                       group-hover:opacity-100
                     "
                   />
-                </a>
+                </Link>
               </li>
 
             </ul>
@@ -303,8 +304,8 @@ const Footer = () => {
             <ul className="mt-5 space-y-3 text-sm">
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="build-pc"
                   className="
                     text-white/55
                     transition-colors duration-300
@@ -312,12 +313,12 @@ const Footer = () => {
                   "
                 >
                   PC Building
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="components"
                   className="
                     text-white/55
                     transition-colors duration-300
@@ -325,7 +326,7 @@ const Footer = () => {
                   "
                 >
                   Price Comparison
-                </a>
+                </Link>
               </li>
 
               <li>
@@ -342,8 +343,8 @@ const Footer = () => {
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="build-pc"
                   className="
                     text-white/55
                     transition-colors duration-300
@@ -351,12 +352,12 @@ const Footer = () => {
                   "
                 >
                   Build Consultation
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/"
                   className="
                     text-white/55
                     transition-colors duration-300
@@ -364,7 +365,7 @@ const Footer = () => {
                   "
                 >
                   Market Partners
-                </a>
+                </Link>
               </li>
 
             </ul>

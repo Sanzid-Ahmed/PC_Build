@@ -1,14 +1,8 @@
-
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import React, {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import useProducts from "../../hooks/useProducts";
-
 import FilterSidebar from "./FilterSidebar/FilterSidebar";
 import SortBar from "./SortBar/SortBar";
 import ActiveFilters from "./ActiveFilters/ActiveFilters";
@@ -21,22 +15,9 @@ const PRODUCTS_PER_PAGE = 12;
 const Components = () => {
   const { products, loading, error } = useProducts();
 
-  /* =====================================================
-     FILTER STATES
-  ===================================================== */
-
-  const [selectedCategory, setSelectedCategory] =
-    useState("All");
-
-  const [selectedStore, setSelectedStore] =
-    useState("All");
-
-  const [sortOption, setSortOption] =
-    useState("default");
-
-  /* =====================================================
-     PRICE STATES
-  ===================================================== */
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedStore, setSelectedStore] = useState("All");
+  const [sortOption, setSortOption] = useState("default");
 
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
@@ -45,10 +26,6 @@ const Components = () => {
     min: 0,
     max: 0,
   });
-
-  /* =====================================================
-     PAGINATION
-  ===================================================== */
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -59,12 +36,8 @@ const Components = () => {
   const preparedProducts = useMemo(() => {
     return products.map((product) => ({
       ...product,
-
-      numericPrice:
-        Number(product.price) || 0,
-
-      searchableName:
-        String(product.name || "").toLowerCase(),
+      numericPrice: Number(product.price) || 0,
+      searchableName: String(product.name || "").toLowerCase(),
     }));
   }, [products]);
 
@@ -76,10 +49,7 @@ const Components = () => {
     const categorySet = new Set();
 
     preparedProducts.forEach((product) => {
-      if (
-        product.category &&
-        product.category.trim() !== ""
-      ) {
+      if (product.category && product.category.trim() !== "") {
         categorySet.add(product.category);
       }
     });
@@ -95,10 +65,7 @@ const Components = () => {
     const storeSet = new Set();
 
     preparedProducts.forEach((product) => {
-      if (
-        product.store &&
-        product.store.trim() !== ""
-      ) {
+      if (product.store && product.store.trim() !== "") {
         storeSet.add(product.store);
       }
     });
@@ -145,9 +112,7 @@ const Components = () => {
   ===================================================== */
 
   useEffect(() => {
-    if (preparedProducts.length === 0) {
-      return;
-    }
+    if (preparedProducts.length === 0) return;
 
     let lowest = Infinity;
     let highest = -Infinity;
@@ -156,22 +121,12 @@ const Components = () => {
       const price = product.numericPrice;
 
       if (price >= 0) {
-        if (price < lowest) {
-          lowest = price;
-        }
-
-        if (price > highest) {
-          highest = price;
-        }
+        if (price < lowest) lowest = price;
+        if (price > highest) highest = price;
       }
     });
 
-    if (
-      lowest === Infinity ||
-      highest === -Infinity
-    ) {
-      return;
-    }
+    if (lowest === Infinity || highest === -Infinity) return;
 
     const newMin = Math.floor(lowest);
     const newMax = Math.ceil(highest);
@@ -186,15 +141,13 @@ const Components = () => {
   }, [preparedProducts]);
 
   /* =====================================================
-     FILTER PRODUCTS
+     FILTER + SORT
   ===================================================== */
 
   const filteredProducts = useMemo(() => {
     const result = [];
 
     for (const product of preparedProducts) {
-      /* Category */
-
       if (
         selectedCategory !== "All" &&
         product.category !== selectedCategory
@@ -202,16 +155,12 @@ const Components = () => {
         continue;
       }
 
-      /* Store */
-
       if (
         selectedStore !== "All" &&
         product.store !== selectedStore
       ) {
         continue;
       }
-
-      /* Price */
 
       if (
         product.numericPrice < minPrice ||
@@ -223,19 +172,15 @@ const Components = () => {
       result.push(product);
     }
 
-    /* Sort */
-
     if (sortOption === "price-low") {
       result.sort(
-        (a, b) =>
-          a.numericPrice - b.numericPrice
+        (a, b) => a.numericPrice - b.numericPrice
       );
     }
 
     if (sortOption === "price-high") {
       result.sort(
-        (a, b) =>
-          b.numericPrice - a.numericPrice
+        (a, b) => b.numericPrice - a.numericPrice
       );
     }
 
@@ -270,39 +215,28 @@ const Components = () => {
   ===================================================== */
 
   const totalPages = Math.ceil(
-    filteredProducts.length /
-      PRODUCTS_PER_PAGE
+    filteredProducts.length / PRODUCTS_PER_PAGE
   );
 
   useEffect(() => {
-    if (
-      totalPages > 0 &&
-      currentPage > totalPages
-    ) {
+    if (totalPages > 0 && currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
 
-    if (
-      totalPages === 0 &&
-      currentPage !== 1
-    ) {
+    if (totalPages === 0 && currentPage !== 1) {
       setCurrentPage(1);
     }
   }, [totalPages, currentPage]);
 
   const paginatedProducts = useMemo(() => {
     const start =
-      (currentPage - 1) *
-      PRODUCTS_PER_PAGE;
+      (currentPage - 1) * PRODUCTS_PER_PAGE;
 
     return filteredProducts.slice(
       start,
       start + PRODUCTS_PER_PAGE
     );
-  }, [
-    filteredProducts,
-    currentPage,
-  ]);
+  }, [filteredProducts, currentPage]);
 
   /* =====================================================
      PAGE NUMBERS
@@ -328,9 +262,7 @@ const Components = () => {
       ];
     }
 
-    if (
-      currentPage >= totalPages - 3
-    ) {
+    if (currentPage >= totalPages - 3) {
       return [
         1,
         "...",
@@ -382,71 +314,19 @@ const Components = () => {
 
   if (error) {
     return (
-      <section
-        className="
-          flex
-          min-h-screen
-          items-center
-          justify-center
-          bg-base-100
-          px-4
-          sm:px-5
-        "
-      >
-        <div
-          className="
-            w-full
-            max-w-lg
-            rounded-2xl
-            border
-            border-error/20
-            bg-base-100
-            p-6
-            text-center
-            shadow-lg
-            sm:p-8
-          "
-        >
-          <h2
-            className="
-              text-xl
-              font-bold
-              text-error
-              sm:text-2xl
-            "
-          >
+      <section className="flex min-h-screen items-center justify-center bg-base-100 px-[clamp(0.75rem,2vw,2rem)]">
+        <div className="w-full max-w-lg rounded-[clamp(1rem,2vw,1.5rem)] border border-error/20 bg-base-100 p-[clamp(1.25rem,3vw,2rem)] text-center shadow-lg">
+          <h2 className="text-[clamp(1.15rem,2vw,1.5rem)] font-bold text-error">
             Failed to Load Components
           </h2>
 
-          <p
-            className="
-              mt-3
-              break-words
-              text-sm
-              text-base-content/60
-              sm:text-base
-            "
-          >
+          <p className="mt-3 break-words text-[clamp(0.8rem,1vw,1rem)] leading-relaxed text-base-content/60">
             {error}
           </p>
 
           <button
-            onClick={() =>
-              window.location.reload()
-            }
-            className="
-              mt-6
-              rounded-xl
-              bg-primary
-              px-6
-              py-3
-              font-semibold
-              text-primary-content
-              transition-all
-              duration-200
-              hover:bg-accent
-              hover:shadow-md
-            "
+            onClick={() => window.location.reload()}
+            className="mt-6 rounded-xl bg-primary px-[clamp(1rem,2vw,1.5rem)] py-[clamp(0.6rem,1vw,0.8rem)] text-[clamp(0.75rem,1vw,0.9rem)] font-semibold text-primary-content transition-all duration-200 hover:bg-accent hover:shadow-md"
           >
             Try Again
           </button>
@@ -456,211 +336,199 @@ const Components = () => {
   }
 
   /* =====================================================
-     MAIN UI
+     MAIN
   ===================================================== */
 
   return (
     <section
       className="
         min-h-screen
+        w-full
         overflow-x-hidden
         bg-base-100
-        px-3
-        pb-16
-        pt-24
-        sm:px-5
-        sm:pb-20
-        sm:pt-28
+
+        px-[clamp(0.75rem,2vw,2.5rem)]
+        pt-[clamp(5.5rem,8vw,8rem)]
+        pb-[clamp(3rem,5vw,5rem)]
       "
     >
-      <div
-        className="
-          mx-auto
-          w-full
-          xl:w-10/12
-        "
-      >
+      <div className="mx-auto w-full max-w-[1800px]">
 
-        {/* ================= HEADER ================= */}
+        {/* =================================================
+            HEADER
+        ================================================= */}
 
-        <div className="mb-7 sm:mb-10">
-          <div
-            className="
-              flex
-              flex-col
-              gap-5
-              md:flex-row
-              md:items-end
-              md:justify-between
-            "
-          >
-            <div className="min-w-0">
+        <div className="mb-[clamp(1.5rem,3vw,2.75rem)]">
+          <div className="min-w-0">
 
-              <p
-                className="
-                  mb-2
-                  text-xs
-                  font-bold
-                  uppercase
-                  tracking-[0.16em]
-                  text-primary
-                  sm:text-sm
-                  sm:tracking-[0.2em]
-                "
-              >
-                ThriftBuild Components
-              </p>
+            <p
+              className="
+                mb-[clamp(0.35rem,0.7vw,0.6rem)]
+                text-[clamp(0.6rem,0.8vw,0.85rem)]
+                font-bold
+                uppercase
+                tracking-[clamp(0.1em,0.2vw,0.2em)]
+                text-primary
+              "
+            >
+              ThriftBuild Components
+            </p>
 
-              <h1
-                className="
-                  text-2xl
-                  font-extrabold
-                  leading-tight
-                  text-base-content
-                  sm:text-3xl
-                  md:text-4xl
-                "
-              >
-                Find the Right Components
-              </h1>
+            <h1
+              className="
+                break-words
+                text-[clamp(1.6rem,3vw,3.1rem)]
+                font-extrabold
+                leading-[1.1]
+                text-base-content
+              "
+            >
+              Find the Right Components
+            </h1>
 
-              <p
-                className="
-                  mt-3
-                  max-w-2xl
-                  text-sm
-                  leading-6
-                  text-base-content/60
-                  sm:text-base
-                "
-              >
-                Browse PC components from
-                different stores and find the
-                right products at the right price.
-              </p>
+            <p
+              className="
+                mt-[clamp(0.5rem,1vw,0.8rem)]
+                max-w-2xl
+                break-words
+                text-[clamp(0.75rem,1vw,1rem)]
+                leading-[1.6]
+                text-base-content/60
+              "
+            >
+              Browse PC components from different stores
+              and find the right products at the right
+              price.
+            </p>
 
-            </div>
           </div>
         </div>
 
-
-        {/* ================= MAIN GRID ================= */}
+        {/* =================================================
+            MAIN CONTENT
+        ================================================= */}
 
         <div
           className="
             grid
             min-w-0
-            gap-6
-            lg:grid-cols-[250px_minmax(0,1fr)]
-            lg:gap-7
-            xl:grid-cols-[270px_minmax(0,1fr)]
-            xl:gap-8
+            grid-cols-1
+
+            gap-[clamp(1rem,1.5vw,2rem)]
+
+            lg:grid-cols-[clamp(190px,18vw,270px)_minmax(0,1fr)]
           "
         >
 
-          {/* ================= SIDEBAR ================= */}
+          {/* =================================================
+              FILTER SIDEBAR
+          ================================================= */}
 
-          <FilterSidebar
-            categories={categories}
-            stores={stores}
-            categoryCounts={categoryCounts}
-            storeCounts={storeCounts}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={
-              setSelectedCategory
-            }
-            selectedStore={selectedStore}
-            setSelectedStore={setSelectedStore}
-            minPrice={minPrice}
-            maxPrice={maxPrice}
-            priceRange={priceRange}
-            setMinPrice={setMinPrice}
-            setMaxPrice={setMaxPrice}
-            resetFilters={resetFilters}
-            setCurrentPage={setCurrentPage}
-          />
+          <div className="min-w-0">
+            <FilterSidebar
+              categories={categories}
+              stores={stores}
+              categoryCounts={categoryCounts}
+              storeCounts={storeCounts}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              selectedStore={selectedStore}
+              setSelectedStore={setSelectedStore}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              priceRange={priceRange}
+              setMinPrice={setMinPrice}
+              setMaxPrice={setMaxPrice}
+              resetFilters={resetFilters}
+              setCurrentPage={setCurrentPage}
+            />
+          </div>
 
-
-          {/* ================= PRODUCTS ================= */}
+          {/* =================================================
+              PRODUCTS
+          ================================================= */}
 
           <div className="min-w-0">
 
             {/* SORT */}
 
-            <SortBar
-              sortOption={sortOption}
-              setSortOption={setSortOption}
-              setCurrentPage={setCurrentPage}
-              productCount={
-                filteredProducts.length
-              }
-            />
-
+            <div className="min-w-0">
+              <SortBar
+                sortOption={sortOption}
+                setSortOption={setSortOption}
+                setCurrentPage={setCurrentPage}
+                productCount={filteredProducts.length}
+              />
+            </div>
 
             {/* ACTIVE FILTERS */}
 
-            <ActiveFilters
-              selectedCategory={
-                selectedCategory
-              }
-              setSelectedCategory={
-                setSelectedCategory
-              }
-              selectedStore={selectedStore}
-              setSelectedStore={
-                setSelectedStore
-              }
-              setCurrentPage={
-                setCurrentPage
-              }
-            />
+            <div className="mt-[clamp(0.5rem,1vw,0.8rem)] min-w-0">
+              <ActiveFilters
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                selectedStore={selectedStore}
+                setSelectedStore={setSelectedStore}
+                setCurrentPage={setCurrentPage}
+              />
+            </div>
 
+            {/* =================================================
+                PRODUCT GRID
 
-            {/* PRODUCT GRID */}
+                MOBILE  = 1
+                SM      = 2
+                LG      = 3
+                XL      = 4
+            ================================================= */}
 
             {paginatedProducts.length > 0 ? (
               <div
                 className="
+                  mt-[clamp(0.75rem,1.5vw,1.25rem)]
+
                   grid
                   min-w-0
+
                   grid-cols-1
-                  gap-4
-                  sm:grid-cols-3
-                  sm:gap-5
+                  sm:grid-cols-2
+                  lg:grid-cols-3
                   xl:grid-cols-4
-                  xl:gap-6
+
+                  gap-[clamp(0.65rem,1vw,1.5rem)]
                 "
               >
-                {paginatedProducts.map(
-                  (product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                    />
-                  )
-                )}
+                {paginatedProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="
+                      min-w-0
+                      w-full
+                    "
+                  >
+                    <ProductCard product={product} />
+                  </div>
+                ))}
               </div>
             ) : (
               <div
                 className="
-                  rounded-2xl
+                  mt-[clamp(1rem,2vw,1.5rem)]
+                  rounded-[clamp(1rem,2vw,1.5rem)]
                   border
                   border-base-300
                   bg-base-100
-                  px-5
-                  py-16
+                  px-[clamp(1rem,3vw,1.5rem)]
+                  py-[clamp(3rem,6vw,5rem)]
                   text-center
                   shadow-sm
-                  sm:px-6
-                  sm:py-20
                 "
               >
                 <h3
                   className="
-                    text-lg
+                    text-[clamp(1rem,1.5vw,1.25rem)]
                     font-bold
                     text-base-content
-                    sm:text-xl
                   "
                 >
                   No Components Found
@@ -671,12 +539,13 @@ const Components = () => {
                     mx-auto
                     mt-2
                     max-w-md
-                    text-sm
+                    text-[clamp(0.75rem,1vw,0.9rem)]
+                    leading-relaxed
                     text-base-content/60
                   "
                 >
-                  No components match your
-                  current filters.
+                  No components match your current
+                  filters.
                 </p>
 
                 <button
@@ -685,9 +554,9 @@ const Components = () => {
                     mt-6
                     rounded-xl
                     bg-primary
-                    px-5
-                    py-3
-                    text-sm
+                    px-[clamp(1rem,2vw,1.4rem)]
+                    py-[clamp(0.6rem,1vw,0.75rem)]
+                    text-[clamp(0.75rem,1vw,0.9rem)]
                     font-bold
                     text-primary-content
                     transition-all
@@ -701,15 +570,22 @@ const Components = () => {
               </div>
             )}
 
+            {/* PAGINATION */}
 
-            {/* ================= PAGINATION ================= */}
-
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              pageNumbers={pageNumbers}
-              setCurrentPage={setCurrentPage}
-            />
+            <div
+              className="
+                mt-[clamp(1.5rem,3vw,2.5rem)]
+                min-w-0
+                overflow-x-auto
+              "
+            >
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageNumbers={pageNumbers}
+                setCurrentPage={setCurrentPage}
+              />
+            </div>
 
           </div>
         </div>
