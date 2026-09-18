@@ -1,21 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { motion, AnimatePresence } from "framer-motion";
-import { FiArrowRight, FiX, FiCheckCircle } from "react-icons/fi";
-import { FaMicrochip, FaShoppingCart, FaDesktop } from "react-icons/fa";
+import { FiArrowRight, FiX } from "react-icons/fi";
+import { FaMicrochip, FaShoppingCart } from "react-icons/fa";
 
 const GlobalPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Check whether the popup has already been shown during this session
     const popupShown = sessionStorage.getItem("thriftbuild-popup-shown");
 
     if (popupShown) {
       return;
     }
 
-    // Show popup after 1 second delay
     const timer = setTimeout(() => {
       setIsOpen(true);
       sessionStorage.setItem("thriftbuild-popup-shown", "true");
@@ -34,134 +31,340 @@ const GlobalPopup = () => {
     }
   };
 
+  if (!isOpen) {
+    return null;
+  }
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={handleBackdropClick}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-md"
+    <div
+      onClick={handleBackdropClick}
+      className="
+        fixed inset-0 z-[100]
+        flex items-center justify-center
+        bg-black/60
+        px-4 py-6
+        backdrop-blur-sm
+      "
+    >
+      {/* Popup */}
+      <div
+        className="
+          relative
+          w-full
+          max-w-2xl
+          overflow-hidden
+          rounded-2xl
+          border border-base-300
+          bg-base-100
+          shadow-2xl
+          animate-[popupIn_0.25s_ease-out]
+        "
+      >
+        {/* Close Button */}
+        <button
+          type="button"
+          onClick={closePopup}
+          aria-label="Close popup"
+          className="
+            absolute
+            right-3 top-3
+            z-30
+            flex h-9 w-9
+            items-center justify-center
+            rounded-full
+            bg-secondary
+            text-secondary-content
+            shadow-md
+            transition-all duration-200
+            hover:scale-105
+            hover:bg-primary
+            hover:text-primary-content
+          "
         >
-          {/* Modal Container */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-[#0d0d12] shadow-[0_0_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
+          <FiX className="text-base" />
+        </button>
+
+        {/* Main Layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-[1.15fr_0.85fr]">
+
+          {/* =========================
+              LEFT SIDE
+          ========================== */}
+          <div
+            className="
+              relative
+              overflow-hidden
+              bg-secondary
+              px-6 py-7
+              text-secondary-content
+              sm:px-7 sm:py-8
+            "
           >
-            {/* Top Glow Accent Bar */}
-            <div className="h-1 w-full bg-gradient-to-r from-primary via-primary/80 to-primary/30 shadow-[0_0_15px_rgba(229,9,47,0.5)]" />
+            {/* Decorative circles */}
+            <div
+              className="
+                pointer-events-none
+                absolute
+                -right-20 -top-20
+                h-48 w-48
+                rounded-full
+                bg-primary/20
+                blur-3xl
+              "
+            />
 
-            {/* Close Button */}
-            <button
-              type="button"
-              onClick={closePopup}
-              aria-label="Close popup"
-              className="group absolute right-4 top-4 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-all duration-300 hover:border-primary/50 hover:bg-primary hover:text-white active:scale-90"
-            >
-              <FiX className="text-lg transition-transform duration-300 group-hover:rotate-90" />
-            </button>
+            <div
+              className="
+                pointer-events-none
+                absolute
+                -bottom-24 -left-20
+                h-48 w-48
+                rounded-full
+                bg-primary/10
+                blur-3xl
+              "
+            />
 
-            {/* Content Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-12">
-              
-              {/* Left Side: Brand Highlights */}
-              <div className="relative flex flex-col justify-between overflow-hidden bg-white/[0.02] p-6 sm:p-8 md:col-span-7">
-                
-                {/* Background Ambient Glows */}
-                <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-16 -right-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+            <div className="relative z-10">
 
-                <div className="relative z-10">
-                  {/* Badge */}
-                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-primary shadow-[0_0_12px_rgba(229,9,47,0.2)]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-ping" />
-                    ThriftBuild Configurator
-                  </div>
+              {/* Brand Label */}
+              <div
+                className="
+                  mb-4
+                  inline-flex
+                  items-center
+                  gap-2
+                  rounded-full
+                  border border-primary/30
+                  bg-primary/10
+                  px-2.5 py-1
+                "
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
 
-                  {/* Headline */}
-                  <h2 className="text-2xl font-black text-white sm:text-3xl leading-tight">
-                    Build Your <br />
-                    <span className="bg-gradient-to-r from-primary via-red-400 to-primary bg-clip-text text-transparent">
-                      Dream PC
-                    </span>
-                  </h2>
-
-                  <p className="mt-2.5 text-xs text-white/60 leading-relaxed">
-                    Filter components, compare real-time store pricing, and optimize your setup within your target budget.
-                  </p>
-
-                  {/* Key Feature List */}
-                  <div className="mt-6 space-y-2.5">
-                    <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-2.5 backdrop-blur-sm">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/20 text-primary">
-                        <FaMicrochip className="text-xs" />
-                      </div>
-                      <span className="text-xs font-semibold text-white/80">
-                        Smart Compatibility Check
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-2.5 backdrop-blur-sm">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/20 text-primary">
-                        <FaShoppingCart className="text-xs" />
-                      </div>
-                      <span className="text-xs font-semibold text-white/80">
-                        Live Price Aggregation
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                <span
+                  className="
+                    text-[10px]
+                    font-bold
+                    uppercase
+                    tracking-[0.16em]
+                    text-primary
+                  "
+                >
+                  ThriftBuild
+                </span>
               </div>
 
-              {/* Right Side: Primary CTA */}
-              <div className="flex flex-col items-center justify-center border-t border-white/10 bg-black/40 p-6 sm:p-8 md:col-span-5 md:border-l md:border-t-0">
-                <div className="w-full text-center">
-                  
-                  {/* Graphic Icon */}
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 text-primary shadow-[0_0_20px_rgba(229,9,47,0.25)]">
-                    <FaDesktop className="text-2xl" />
+              {/* Heading */}
+              <h2
+                className="
+                  max-w-sm
+                  text-2xl
+                  font-extrabold
+                  leading-tight
+                  sm:text-3xl
+                "
+              >
+                Build Your
+                <span className="block text-primary">
+                  Dream PC.
+                </span>
+              </h2>
+
+              {/* Description */}
+              <p
+                className="
+                  mt-3
+                  max-w-sm
+                  text-xs
+                  leading-5
+                  text-secondary-content/65
+                  sm:text-sm
+                "
+              >
+                Find the right components, compare prices, and
+                build a PC that fits your needs and budget.
+              </p>
+
+              {/* Features */}
+              <div className="mt-5 space-y-2.5">
+
+                {/* Feature 1 */}
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="
+                      flex h-8 w-8 shrink-0
+                      items-center justify-center
+                      rounded-lg
+                      bg-primary
+                      text-primary-content
+                    "
+                  >
+                    <FaMicrochip className="text-xs" />
                   </div>
 
-                  <h3 className="mt-4 text-lg font-bold text-white">
-                    Ready to Start?
-                  </h3>
-
-                  <p className="mt-1 text-xs text-white/50">
-                    Configure your next custom rig step-by-step.
-                  </p>
-
-                  {/* Actions */}
-                  <div className="mt-6 space-y-2.5">
-                    <Link
-                      to="/build-pc"
-                      onClick={closePopup}
-                      className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-xs font-bold text-white shadow-lg shadow-primary/25 transition-all duration-300 hover:bg-primary/90 hover:shadow-primary/40 active:scale-95"
-                    >
-                      <span>Build My PC</span>
-                      <FiArrowRight className="text-sm transition-transform duration-300 group-hover:translate-x-1" />
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={closePopup}
-                      className="w-full rounded-xl border border-transparent px-4 py-2.5 text-xs font-semibold text-white/40 transition-colors duration-200 hover:border-white/10 hover:bg-white/5 hover:text-white"
-                    >
-                      Maybe Later
-                    </button>
-                  </div>
-
+                  <span className="text-xs font-semibold sm:text-sm">
+                    Smart component selection
+                  </span>
                 </div>
+
+                {/* Feature 2 */}
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="
+                      flex h-8 w-8 shrink-0
+                      items-center justify-center
+                      rounded-lg
+                      bg-primary
+                      text-primary-content
+                    "
+                  >
+                    <FaShoppingCart className="text-xs" />
+                  </div>
+
+                  <span className="text-xs font-semibold sm:text-sm">
+                    Compare component prices
+                  </span>
+                </div>
+
               </div>
+            </div>
+          </div>
+
+          {/* =========================
+              RIGHT SIDE
+          ========================== */}
+          <div
+            className="
+              flex
+              items-center
+              justify-center
+              bg-base-200
+              px-6 py-7
+              sm:px-6 sm:py-8
+            "
+          >
+            <div className="w-full max-w-xs text-center">
+
+              {/* PC Icon */}
+              <div
+                className="
+                  mx-auto
+                  flex
+                  h-14 w-14
+                  items-center justify-center
+                  rounded-xl
+                  bg-primary
+                  text-2xl
+                  shadow-lg
+                  sm:h-16 sm:w-16
+                  sm:text-3xl
+                "
+              >
+                🖥️
+              </div>
+
+              {/* Heading */}
+              <h3
+                className="
+                  mt-4
+                  text-xl
+                  font-extrabold
+                  text-base-content
+                  sm:text-2xl
+                "
+              >
+                Ready to Build?
+              </h3>
+
+              {/* Description */}
+              <p
+                className="
+                  mt-2
+                  text-xs
+                  leading-5
+                  text-base-content/60
+                  sm:text-sm
+                "
+              >
+                Tell us what you need, choose your budget,
+                and let ThriftBuild help you create your PC.
+              </p>
+
+              {/* CTA */}
+              <Link
+                to="/build-pc"
+                onClick={closePopup}
+                className="
+                  mt-5
+                  inline-flex
+                  w-full
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-xl
+                  bg-primary
+                  px-4 py-3
+                  text-xs
+                  font-bold
+                  text-primary-content
+                  shadow-md
+                  transition-all duration-300
+                  hover:-translate-y-0.5
+                  hover:bg-accent
+                  hover:shadow-lg
+                  sm:text-sm
+                "
+              >
+                Build My PC
+
+                <FiArrowRight className="text-base" />
+              </Link>
+
+              {/* Maybe Later */}
+              <button
+                type="button"
+                onClick={closePopup}
+                className="
+                  mt-2
+                  w-full
+                  rounded-xl
+                  px-4 py-2.5
+                  text-xs
+                  font-semibold
+                  text-base-content/50
+                  transition-all duration-200
+                  hover:bg-base-300
+                  hover:text-base-content
+                  sm:text-sm
+                "
+              >
+                Maybe Later
+              </button>
 
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Popup Animation */}
+      <style>
+        {`
+          @keyframes popupIn {
+            from {
+              opacity: 0;
+              transform: scale(0.94) translateY(8px);
+            }
+
+            to {
+              opacity: 1;
+              transform: scale(1) translateY(0);
+            }
+          }
+        `}
+      </style>
+    </div>
   );
 };
 
