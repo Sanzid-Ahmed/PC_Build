@@ -3,7 +3,7 @@ import useAuth from "../../../hooks/useAuth";
 import useApi from "../../../hooks/useApi";
 import { useLocation, useNavigate } from "react-router";
 
-const SocialLogin = ({ role = "user" }) => {
+const SocialLogin = ({ role }) => {
   const { signInGoogle } = useAuth();
   const api = useApi();
 
@@ -52,15 +52,11 @@ const SocialLogin = ({ role = "user" }) => {
       // 4. Sync User With Backend
       // -----------------------------------------
       try {
-        const response = await api.post(
-          "/api/users/sync",
-          backendData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await api.post("/api/users/sync", backendData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         console.log("Backend Response:", response.data);
       } catch (backendError) {
@@ -70,19 +66,23 @@ const SocialLogin = ({ role = "user" }) => {
         // Don't log the user out just because Render/backend
         // is temporarily unavailable.
         console.warn(
-          "Firebase login successful, but backend sync could not be completed."
+          "Firebase login successful, but backend sync could not be completed.",
         );
       }
 
       // -----------------------------------------
       // 5. Determine Redirect Location
       // -----------------------------------------
-      const redirectPath =
-        location.state?.from?.pathname ||
-        location.state?.pathname ||
-        (typeof location.state === "string"
-          ? location.state
-          : "/");
+      let redirectPath;
+
+      if (role === "admin") {
+        redirectPath = "/admin";
+      } else {
+        redirectPath =
+          location.state?.from?.pathname ||
+          location.state?.pathname ||
+          (typeof location.state === "string" ? location.state : "/");
+      }
 
       // -----------------------------------------
       // 6. Navigate
@@ -103,9 +103,7 @@ const SocialLogin = ({ role = "user" }) => {
             break;
 
           case "auth/popup-blocked":
-            setErrorMessage(
-              "Google login popup was blocked by your browser."
-            );
+            setErrorMessage("Google login popup was blocked by your browser.");
             break;
 
           case "auth/cancelled-popup-request":
@@ -114,14 +112,12 @@ const SocialLogin = ({ role = "user" }) => {
 
           case "auth/network-request-failed":
             setErrorMessage(
-              "Network error. Please check your internet connection."
+              "Network error. Please check your internet connection.",
             );
             break;
 
           default:
-            setErrorMessage(
-              "Google login failed. Please try again."
-            );
+            setErrorMessage("Google login failed. Please try again.");
         }
 
         return;
@@ -129,22 +125,16 @@ const SocialLogin = ({ role = "user" }) => {
 
       // Backend errors
       if (error?.response) {
-        console.error(
-          "Backend Error:",
-          error.response.data
-        );
+        console.error("Backend Error:", error.response.data);
 
         setErrorMessage(
-          error.response.data?.detail ||
-            "Unable to connect with the server."
+          error.response.data?.detail || "Unable to connect with the server.",
         );
 
         return;
       }
 
-      setErrorMessage(
-        "Something went wrong. Please try again."
-      );
+      setErrorMessage("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -152,9 +142,7 @@ const SocialLogin = ({ role = "user" }) => {
 
   return (
     <div className="pb-8 text-center">
-      <p className="mb-3 text-sm text-base-content/60">
-        OR
-      </p>
+      <p className="mb-3 text-sm text-base-content/60">OR</p>
 
       {errorMessage && (
         <p className="mb-3 rounded-lg bg-error/10 px-3 py-2 text-sm font-medium text-error">
@@ -196,10 +184,7 @@ const SocialLogin = ({ role = "user" }) => {
               viewBox="0 0 512 512"
             >
               <g>
-                <path
-                  d="m0 0H512V512H0"
-                  fill="#fff"
-                />
+                <path d="m0 0H512V512H0" fill="#fff" />
 
                 <path
                   fill="#34a853"
@@ -222,7 +207,6 @@ const SocialLogin = ({ role = "user" }) => {
                 />
               </g>
             </svg>
-
             Login with Google
           </>
         )}

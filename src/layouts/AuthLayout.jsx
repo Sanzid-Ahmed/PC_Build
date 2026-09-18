@@ -1,7 +1,5 @@
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router";
-
 import {
   FaArrowLeft,
   FaCog,
@@ -11,7 +9,6 @@ import {
 } from "react-icons/fa";
 
 import Logo from "../components/logo/Logo";
-
 import AuthImage from "../assets/Auth.jpg";
 
 const ADMIN_PASSCODE = "admin1234";
@@ -20,9 +17,7 @@ const AuthLayout = () => {
   const navigate = useNavigate();
 
   const [showAdminModal, setShowAdminModal] = useState(false);
-
   const [adminPassword, setAdminPassword] = useState("");
-
   const [error, setError] = useState("");
 
   // =========================================================
@@ -30,39 +25,31 @@ const AuthLayout = () => {
   // =========================================================
 
   const handleGoBack = () => {
-    // If there is a previous browser history entry,
-    // go back to that page.
     if (window.history.length > 1) {
       navigate(-1);
     } else {
-      // If there is no previous history,
-      // go to Home.
       navigate("/", { replace: true });
     }
   };
 
   // =========================================================
-  // ADMIN MODAL
+  // ADMIN ACCESS MODAL
   // =========================================================
 
   const openAdminAccess = () => {
     setAdminPassword("");
-
     setError("");
-
     setShowAdminModal(true);
   };
 
   const closeAdminAccess = () => {
     setShowAdminModal(false);
-
     setAdminPassword("");
-
     setError("");
   };
 
   // =========================================================
-  // ADMIN LOGIN
+  // ADMIN VERIFICATION
   // =========================================================
 
   const handleAdminAccess = (e) => {
@@ -71,17 +58,18 @@ const AuthLayout = () => {
     if (adminPassword === ADMIN_PASSCODE) {
       closeAdminAccess();
 
-      navigate("/admin/login");
+      // Go to separate admin authentication layout
+      navigate("/admin-login");
     } else {
       setError("Incorrect admin access password.");
     }
   };
 
   // =========================================================
-  // CLOSE MODAL WITH ESC
+  // ESCAPE KEY
   // =========================================================
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && showAdminModal) {
         closeAdminAccess();
@@ -98,7 +86,7 @@ const AuthLayout = () => {
   return (
     <div className="relative min-h-screen overflow-hidden bg-base-200">
       {/* =====================================================
-          BACKGROUND DECORATION
+          BACKGROUND
       ====================================================== */}
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -157,7 +145,7 @@ const AuthLayout = () => {
           <Logo />
         </div>
 
-        {/* RIGHT ACTIONS */}
+        {/* ACTIONS */}
 
         <div className="flex items-center gap-2 sm:gap-3">
           {/* ADMIN ACCESS */}
@@ -212,7 +200,7 @@ const AuthLayout = () => {
             </span>
           </button>
 
-          {/* GO BACK */}
+          {/* BACK */}
 
           <button
             type="button"
@@ -263,7 +251,7 @@ const AuthLayout = () => {
       </header>
 
       {/* =====================================================
-          MAIN CONTENT
+          MAIN AUTH AREA
       ====================================================== */}
 
       <main
@@ -283,10 +271,6 @@ const AuthLayout = () => {
           lg:pt-32
         "
       >
-        {/* ===================================================
-            AUTH CARD
-        ==================================================== */}
-
         <div
           className="
             relative
@@ -335,7 +319,7 @@ const AuthLayout = () => {
               "
             />
 
-            {/* DARK / RED OVERLAY */}
+            {/* OVERLAY */}
 
             <div
               className="
@@ -392,8 +376,6 @@ const AuthLayout = () => {
                 lg:p-12
               "
             >
-              {/* SMALL LABEL */}
-
               <div
                 className="
                   mb-3
@@ -414,8 +396,6 @@ const AuthLayout = () => {
                 Build. Compare. Choose.
               </div>
 
-              {/* TITLE */}
-
               <h1
                 className="
                   max-w-xl
@@ -433,8 +413,6 @@ const AuthLayout = () => {
                 </span>
               </h1>
 
-              {/* DESCRIPTION */}
-
               <p
                 className="
                   mt-4
@@ -449,8 +427,6 @@ const AuthLayout = () => {
                 and create a PC that perfectly matches your
                 needs, performance, and budget.
               </p>
-
-              {/* BOTTOM INFO */}
 
               <div className="mt-6 flex items-center gap-3 sm:mt-8">
                 <div
@@ -481,7 +457,7 @@ const AuthLayout = () => {
           </section>
 
           {/* =================================================
-              FORM PANEL
+              USER FORM PANEL
           ================================================== */}
 
           <section
@@ -503,8 +479,6 @@ const AuthLayout = () => {
               xl:px-16
             "
           >
-            {/* DECORATION */}
-
             <div
               className="
                 pointer-events-none
@@ -532,8 +506,6 @@ const AuthLayout = () => {
                 blur-3xl
               "
             />
-
-            {/* FORM */}
 
             <div
               className="
@@ -587,7 +559,7 @@ const AuthLayout = () => {
               animate-[modalIn_0.25s_ease-out]
             "
           >
-            {/* RED TOP LINE */}
+            {/* RED LINE */}
 
             <div
               className="
@@ -643,7 +615,6 @@ const AuthLayout = () => {
                   border-primary/20
                   bg-primary/10
                   text-primary
-                  shadow-[0_0_30px_rgba(229,9,47,0.08)]
                 "
               >
                 <FaShieldAlt className="text-2xl" />
@@ -765,14 +736,7 @@ const AuthLayout = () => {
 
                 {/* BUTTONS */}
 
-                <div
-                  className="
-                    mt-6
-                    grid
-                    grid-cols-2
-                    gap-3
-                  "
-                >
+                <div className="mt-6 grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={closeAdminAccess}
@@ -787,11 +751,9 @@ const AuthLayout = () => {
                       font-bold
                       text-gray-400
                       transition-all
-                      duration-200
                       hover:border-gray-700
                       hover:bg-white/5
                       hover:text-white
-                      active:scale-[0.98]
                     "
                   >
                     Cancel
@@ -811,10 +773,8 @@ const AuthLayout = () => {
                       text-white
                       shadow-[0_8px_25px_rgba(229,9,47,0.18)]
                       transition-all
-                      duration-200
                       hover:bg-[#c70727]
                       hover:shadow-[0_10px_30px_rgba(229,9,47,0.3)]
-                      active:scale-[0.98]
                     "
                   >
                     Continue
@@ -830,33 +790,31 @@ const AuthLayout = () => {
           ANIMATIONS
       ====================================================== */}
 
-      <style>
-        {`
-          @keyframes fadeUp {
-            from {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
+      <style>{`
+        @keyframes fadeUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
           }
 
-          @keyframes modalIn {
-            from {
-              opacity: 0;
-              transform: translateY(15px) scale(0.97);
-            }
-
-            to {
-              opacity: 1;
-              transform: translateY(0) scale(1);
-            }
+          to {
+            opacity: 1;
+            transform: translateY(0);
           }
-        `}
-      </style>
+        }
+
+        @keyframes modalIn {
+          from {
+            opacity: 0;
+            transform: translateY(15px) scale(0.97);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+      `}</style>
     </div>
   );
 };

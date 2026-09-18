@@ -12,6 +12,10 @@ import Cart from "../pages/Cart/Cart";
 import ProductDetails from "../pages/Components/ProductDetails/ProductDetails";
 import AdminLogin from "../pages/Auth/AdminLogin/AdminLogin";
 import AdminRegister from "../pages/Auth/AdminRegister/AdminRegister";
+import AdminLayout from "../layouts/AdminLayout";
+import Dashbord from "../pages/Admin/Dashbord/Dashbord";
+import Manageuser from "../pages/Admin/Manageuser/Manageuser";
+import AdminAuthLayout from "../layouts/AdminAuthLayout";
 
 export const router = createBrowserRouter([
     {
@@ -46,25 +50,48 @@ export const router = createBrowserRouter([
         ]
     },
     {
-    path: '/',
+    path: "/",
     Component: AuthLayout,
     children: [
       {
-        path: 'login',
-        Component: Login
+        path: "login",
+        Component: Login,
       },
+
       {
-        path: 'register',
-        Component: Register
+        path: "register",
+        Component: Register,
       },
+    ],
+  },
+   {
+    path: "/",
+    Component: AdminAuthLayout,
+    children: [
       {
-        path: "admin/login",
-        element: <AdminLogin />,
+        path: "admin-login",
+        Component: AdminLogin,
       },
+
       {
-        path: "admin/register",
-        element: <AdminRegister />,
-      }
-    ]
+        path: "admin-register",
+        Component: AdminRegister,
+      },
+    ],
+  },
+  {
+    path: "/admin",
+    Component: AdminLayout,
+    children: [
+      {
+        index: true,
+        Component: Dashbord,
+      },
+
+      {
+        path: "users",
+        Component: Manageuser,
+      },
+    ],
   },
 ])
