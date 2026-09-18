@@ -19,7 +19,7 @@ const GlobalPopup = () => {
     const timer = setTimeout(() => {
       setIsOpen(true);
       sessionStorage.setItem("thriftbuild-popup-shown", "true");
-    }, 500);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
