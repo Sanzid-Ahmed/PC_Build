@@ -330,7 +330,8 @@ const ProductCard = ({ product }) => {
 
             {product.url ? (
               <a
-                href={product.url}
+                // href={product.url}
+                onClick={() => navigate(`/product/${product.id}`)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="
