@@ -1,4 +1,8 @@
-import React from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   FaMicrochip,
   FaMemory,
@@ -9,14 +13,14 @@ import {
   FaCheckCircle,
   FaArrowLeft,
   FaRedo,
+  FaShoppingCart,
 } from "react-icons/fa";
 import { BsMotherboard } from "react-icons/bs";
 import { MdStorage } from "react-icons/md";
+import { useCart } from "../../../hooks/useCart";
 
 const BuildResult = ({ requirements, buildData, buildAgain }) => {
-  // =========================================================
-  // Safety check
-  // =========================================================
+  const { addToCart, cartItems } = useCart();
 
   if (!buildData) {
     return (
@@ -40,20 +44,12 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
     );
   }
 
-  // =========================================================
-  // Backend response
-  // =========================================================
-
   const products = Array.isArray(buildData.products)
     ? buildData.products
     : [];
 
   const totalPrice = Number(buildData.total_price || 0);
   const budget = Number(buildData.budget || 0);
-
-  // =========================================================
-  // Category icons
-  // =========================================================
 
   const getCategoryIcon = (category = "") => {
     const value = category.toLowerCase();
@@ -114,16 +110,11 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
     return <FaDesktop />;
   };
 
-  // =========================================================
-  // Get product image safely
-  // =========================================================
-
   const getProductImage = (product) => {
     if (!product) {
       return null;
     }
 
-    // Direct image fields
     if (product.image) {
       return product.image;
     }
@@ -136,14 +127,12 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
       return product.imageUrl;
     }
 
-    // Backend may return images as an array
     if (Array.isArray(product.images)) {
       if (product.images.length > 0) {
         return product.images[0];
       }
     }
 
-    // Backend may return images as a JSON string
     if (typeof product.images === "string") {
       try {
         const parsed = JSON.parse(product.images);
@@ -156,7 +145,6 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
           return parsed;
         }
       } catch {
-        // If it is already a normal URL/string
         if (product.images.trim() !== "") {
           return product.images;
         }
@@ -166,34 +154,197 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
     return null;
   };
 
-  // =========================================================
-  // Format price
-  // =========================================================
-
   const formatPrice = (price) => {
     const value = Number(price || 0);
 
-    return `৳${value.toLocaleString("en-BD")}`;
+    return `৳${value.toLocaleString("en-BD", {
+      maximumFractionDigits: 2,
+    })}`;
   };
 
-  // =========================================================
-  // Remaining budget
-  // =========================================================
-
   const remainingBudget = budget - totalPrice;
-
-  // =========================================================
-  // Budget percentage
-  // =========================================================
 
   const budgetPercentage =
     budget > 0
       ? Math.min((totalPrice / budget) * 100, 100)
       : 0;
 
-  // =========================================================
-  // Product card
-  // =========================================================
+  const getBottleneckPercentage = (product) => {
+    const category = String(
+      product?.category ||
+        product?.product_category ||
+        ""
+    )
+      .trim()
+      .toLowerCase();
+
+    if (
+      category.includes("processor") ||
+      category.includes("cpu")
+    ) {
+      return 2;
+    }
+
+    if (
+      category.includes("graphics") ||
+      category.includes("gpu") ||
+      category.includes("video card")
+    ) {
+      return 2;
+    }
+
+    if (category.includes("motherboard")) {
+      return 0.8;
+    }
+
+    if (
+      category.includes("ram") ||
+      category.includes("memory")
+    ) {
+      return 0.8;
+    }
+
+    if (category.includes("ssd")) {
+      return 0.5;
+    }
+
+    if (
+      category.includes("hdd") ||
+      category.includes("hard disk")
+    ) {
+      return 0.5;
+    }
+
+    if (
+      category.includes("power supply") ||
+      category.includes("psu")
+    ) {
+      return 0.8;
+    }
+
+    if (
+      category.includes("cooler") ||
+      category.includes("cooling")
+    ) {
+      return 0.5;
+    }
+
+    if (
+      category.includes("casing") ||
+      category.includes("case")
+    ) {
+      return 0.2;
+    }
+
+    if (category.includes("monitor")) {
+      return 1;
+    }
+
+    if (category.includes("keyboard")) {
+      return 1;
+    }
+
+    if (category.includes("mouse")) {
+      return 1;
+    }
+
+    return 0;
+  };
+
+  const getPricingDetails = (product) => {
+    const mainPrice = Number(product?.price || 0);
+
+    const bottleneckPercentage =
+      getBottleneckPercentage(product);
+
+    const bottleneckAmount =
+      (mainPrice * bottleneckPercentage) / 100;
+
+    const total =
+      mainPrice + bottleneckAmount;
+
+    return {
+      mainPrice,
+      bottleneckPercentage,
+      bottleneckAmount,
+      total,
+    };
+  };
+
+  const getProductId = (product) => {
+    return (
+      product.id ??
+      product.product_id ??
+      product.productCode ??
+      product.product_code
+    );
+  };
+
+  const isInCart = (product) => {
+    const productId = getProductId(product);
+
+    return cartItems.some(
+      (item) => item.id === productId
+    );
+  };
+
+  const handleAddToCart = (product) => {
+    const productId = getProductId(product);
+
+    if (isInCart(product)) {
+      return;
+    }
+
+    const {
+      mainPrice,
+      bottleneckPercentage,
+      bottleneckAmount,
+      total,
+    } = getPricingDetails(product);
+
+    addToCart({
+      ...product,
+      id: productId,
+      mainPrice,
+      originalPrice: mainPrice,
+      bottleneck_percentage: bottleneckPercentage,
+      bottleneck_amount: bottleneckAmount,
+      numericPrice: total,
+      price: total,
+      selected: false,
+    });
+  };
+
+  const handleAddAllToCart = () => {
+    products.forEach((product) => {
+      const productId = getProductId(product);
+
+      const alreadyInCart = cartItems.some(
+        (item) => item.id === productId
+      );
+
+      if (!alreadyInCart) {
+        const {
+          mainPrice,
+          bottleneckPercentage,
+          bottleneckAmount,
+          total,
+        } = getPricingDetails(product);
+
+        addToCart({
+          ...product,
+          id: productId,
+          mainPrice,
+          originalPrice: mainPrice,
+          bottleneck_percentage: bottleneckPercentage,
+          bottleneck_amount: bottleneckAmount,
+          numericPrice: total,
+          price: total,
+          selected: false,
+        });
+      }
+    });
+  };
 
   const ProductCard = ({ product, index }) => {
     const image = getProductImage(product);
@@ -210,7 +361,14 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
 
     const brand = product.brand || "";
 
-    const price = Number(product.price || 0);
+    const {
+      mainPrice,
+      bottleneckPercentage,
+      bottleneckAmount,
+      total,
+    } = getPricingDetails(product);
+
+    const alreadyInCart = isInCart(product);
 
     return (
       <div
@@ -228,10 +386,6 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
           hover:shadow-xl
         "
       >
-        {/* ================================================= */}
-        {/* Image */}
-        {/* ================================================= */}
-
         <div
           className="
             relative
@@ -259,13 +413,15 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
               "
               onError={(e) => {
                 e.currentTarget.style.display = "none";
-                e.currentTarget.nextElementSibling.style.display =
-                  "flex";
+
+                if (e.currentTarget.nextElementSibling) {
+                  e.currentTarget.nextElementSibling.style.display =
+                    "flex";
+                }
               }}
             />
           ) : null}
 
-          {/* Fallback */}
           <div
             className={`${
               image ? "hidden" : "flex"
@@ -274,7 +430,6 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
             {getCategoryIcon(category)}
           </div>
 
-          {/* Number */}
           <div
             className="
               absolute
@@ -295,11 +450,31 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
           >
             {String(index + 1).padStart(2, "0")}
           </div>
-        </div>
 
-        {/* ================================================= */}
-        {/* Content */}
-        {/* ================================================= */}
+          <div
+            className="
+              absolute
+              right-3
+              top-3
+              rounded-full
+              border
+              border-base-300
+              bg-base-100/95
+              px-3
+              py-1.5
+              text-xs
+              font-black
+              text-base-content
+              shadow-sm
+              backdrop-blur-sm
+            "
+          >
+            <span className="text-primary">
+              {bottleneckPercentage}%
+            </span>{" "}
+            Bottleneck
+          </div>
+        </div>
 
         <div className="mt-4">
           <div className="flex items-center gap-2">
@@ -332,9 +507,75 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
             </p>
           )}
 
-          <div className="mt-4 flex items-center justify-between">
+          <div
+            className="
+              mt-3
+              rounded-xl
+              border
+              border-primary/10
+              bg-primary/5
+              px-3
+              py-3
+            "
+          >
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-xs font-semibold text-base-content/60">
+                Main Price
+              </span>
+
+              <span className="text-sm font-black text-base-content">
+                {formatPrice(mainPrice)}
+              </span>
+            </div>
+
+            <div className="mt-2 flex items-center justify-between gap-3">
+              <span className="text-xs font-semibold text-base-content/60">
+                Bottleneck
+              </span>
+
+              <span className="text-sm font-black text-primary">
+                {bottleneckPercentage}%
+              </span>
+            </div>
+
+            <div className="mt-2 flex items-center justify-between gap-3">
+              <span className="text-xs font-semibold text-base-content/60">
+                Adjustment
+              </span>
+
+              <span className="text-sm font-bold text-primary">
+                +{formatPrice(bottleneckAmount)}
+              </span>
+            </div>
+
+            <div className="my-3 border-t border-base-300" />
+
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-black text-base-content">
+                Total
+              </span>
+
+              <span className="text-lg font-black text-success">
+                {formatPrice(total)}
+              </span>
+            </div>
+
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-base-300">
+              <div
+                className="h-full rounded-full bg-primary transition-all duration-500"
+                style={{
+                  width: `${Math.min(
+                    Math.max(bottleneckPercentage, 0),
+                    100
+                  )}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between gap-3">
             <span className="text-lg font-black text-base-content">
-              {formatPrice(price)}
+              {formatPrice(total)}
             </span>
 
             <span className="flex items-center gap-1 text-xs font-bold text-success">
@@ -342,21 +583,45 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
               Available
             </span>
           </div>
+
+          <button
+            type="button"
+            onClick={() => handleAddToCart(product)}
+            disabled={alreadyInCart}
+            className={`
+              mt-4
+              flex
+              w-full
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              px-4
+              py-3
+              text-sm
+              font-black
+              transition-all
+              duration-200
+              ${
+                alreadyInCart
+                  ? "cursor-not-allowed border border-base-300 bg-base-200 text-base-content/50"
+                  : "bg-primary text-primary-content hover:bg-accent hover:shadow-md"
+              }
+            `}
+          >
+            <FaShoppingCart />
+
+            {alreadyInCart
+              ? "Added to Cart"
+              : "Add to Cart"}
+          </button>
         </div>
       </div>
     );
   };
 
-  // =========================================================
-  // Render
-  // =========================================================
-
   return (
     <div className="mx-auto w-full max-w-6xl">
-      {/* ===================================================== */}
-      {/* Header */}
-      {/* ===================================================== */}
-
       <div
         className="
           rounded-3xl
@@ -396,7 +661,6 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
             </p>
           </div>
 
-          {/* Success */}
           <div
             className="
               flex
@@ -418,10 +682,6 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
             Build Generated
           </div>
         </div>
-
-        {/* =================================================== */}
-        {/* Requirements */}
-        {/* =================================================== */}
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <RequirementItem
@@ -451,12 +711,7 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
         </div>
       </div>
 
-      {/* ===================================================== */}
-      {/* Price Summary */}
-      {/* ===================================================== */}
-
       <div className="mt-6 grid gap-4 md:grid-cols-3">
-        {/* Total */}
         <div
           className="
             rounded-2xl
@@ -476,7 +731,6 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
           </p>
         </div>
 
-        {/* Budget */}
         <div
           className="
             rounded-2xl
@@ -496,7 +750,6 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
           </p>
         </div>
 
-        {/* Remaining */}
         <div
           className="
             rounded-2xl
@@ -528,10 +781,6 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
           )}
         </div>
       </div>
-
-      {/* ===================================================== */}
-      {/* Budget Progress */}
-      {/* ===================================================== */}
 
       <div
         className="
@@ -569,12 +818,8 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
         </p>
       </div>
 
-      {/* ===================================================== */}
-      {/* Products */}
-      {/* ===================================================== */}
-
       <div className="mt-10">
-        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <span className="text-sm font-black uppercase tracking-widest text-primary">
               Components
@@ -585,9 +830,38 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
             </h2>
           </div>
 
-          <p className="text-sm font-semibold text-base-content/50">
-            {products.length} components selected
-          </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <p className="text-sm font-semibold text-base-content/50">
+              {products.length} components selected
+            </p>
+
+            <button
+              type="button"
+              onClick={handleAddAllToCart}
+              disabled={products.length === 0}
+              className="
+                flex
+                items-center
+                justify-center
+                gap-2
+                rounded-xl
+                bg-primary
+                px-5
+                py-3
+                text-sm
+                font-black
+                text-primary-content
+                transition
+                hover:bg-accent
+                hover:shadow-md
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
+            >
+              <FaShoppingCart />
+              Add All to Cart
+            </button>
+          </div>
         </div>
 
         {products.length > 0 ? (
@@ -627,10 +901,6 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
         )}
       </div>
 
-      {/* ===================================================== */}
-      {/* Backend Message */}
-      {/* ===================================================== */}
-
       {buildData.message && (
         <div
           className="
@@ -657,10 +927,6 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
           </div>
         </div>
       )}
-
-      {/* ===================================================== */}
-      {/* Bottom Actions */}
-      {/* ===================================================== */}
 
       <div
         className="
@@ -725,10 +991,6 @@ const BuildResult = ({ requirements, buildData, buildAgain }) => {
     </div>
   );
 };
-
-// =============================================================
-// Requirement Item
-// =============================================================
 
 const RequirementItem = ({ label, value }) => {
   return (

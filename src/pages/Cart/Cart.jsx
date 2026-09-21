@@ -6,25 +6,42 @@ import {
   FaShoppingCart,
   FaArrowLeft,
   FaExternalLinkAlt,
+  FaCheck,
 } from "react-icons/fa";
 import { Link } from "react-router";
 import { useCart } from "../../hooks/useCart";
 
-
 const Cart = () => {
   const {
     cartItems,
-    cartCount,
+    cartItemCount,
+    selectedItemCount,
     cartTotal,
+    allSelected,
     increaseQuantity,
     decreaseQuantity,
     removeFromCart,
     clearCart,
+    toggleSelection,
+    selectAll,
+    deselectAll,
   } = useCart();
 
-  /* =====================================================
-     EMPTY CART
-  ===================================================== */
+  // =====================================================
+  // SELECT ALL / DESELECT ALL
+  // =====================================================
+
+  const handleSelectAll = () => {
+    if (allSelected) {
+      deselectAll();
+    } else {
+      selectAll();
+    }
+  };
+
+  // =====================================================
+  // EMPTY CART
+  // =====================================================
 
   if (cartItems.length === 0) {
     return (
@@ -85,9 +102,14 @@ const Cart = () => {
     );
   }
 
+  // =====================================================
+  // CART
+  // =====================================================
+
   return (
     <main className="min-h-screen bg-base-100 px-3 pb-16 pt-28 sm:px-5 sm:pb-20 sm:pt-32">
       <div className="mx-auto w-full xl:w-10/12">
+
         {/* =====================================================
             HEADER
         ===================================================== */}
@@ -103,7 +125,8 @@ const Cart = () => {
             </h1>
 
             <p className="mt-2 text-sm text-base-content/60 sm:text-base">
-              {cartCount} {cartCount === 1 ? "item" : "items"} in your cart
+              {cartItemCount}{" "}
+              {cartItemCount === 1 ? "item" : "items"} in your cart
             </p>
           </div>
 
@@ -136,19 +159,63 @@ const Cart = () => {
         </div>
 
         {/* =====================================================
+            SELECT ALL BAR
+        ===================================================== */}
+
+        <div
+          className="
+            mb-5
+            flex
+            flex-col
+            gap-3
+            rounded-2xl
+            border
+            border-base-300
+            bg-base-200/50
+            px-4
+            py-3
+            sm:flex-row
+            sm:items-center
+            sm:justify-between
+            sm:px-5
+          "
+        >
+          <label className="flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={allSelected}
+              onChange={handleSelectAll}
+              className="checkbox checkbox-primary checkbox-sm"
+            />
+
+            <span className="text-sm font-bold text-base-content">
+              {allSelected ? "Deselect All" : "Select All"}
+            </span>
+          </label>
+
+          <div className="text-sm text-base-content/60">
+            <span className="font-bold text-primary">
+              {selectedItemCount}
+            </span>{" "}
+            {selectedItemCount === 1 ? "item" : "items"} selected for purchase
+          </div>
+        </div>
+
+        {/* =====================================================
             CART LAYOUT
         ===================================================== */}
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+
           {/* ===================================================
               PRODUCTS
           =================================================== */}
 
           <div className="space-y-4">
             {cartItems.map((item) => {
-              /* -----------------------------------------------
-                 IMAGE
-              ------------------------------------------------ */
+              // =================================================
+              // IMAGE
+              // =================================================
 
               let images = item.images;
 
@@ -165,9 +232,9 @@ const Cart = () => {
                   ? images[0]
                   : null;
 
-              /* -----------------------------------------------
-                 PRICE
-              ------------------------------------------------ */
+              // =================================================
+              // PRICE
+              // =================================================
 
               const price =
                 Number(item.numericPrice) ||
@@ -177,17 +244,45 @@ const Cart = () => {
               return (
                 <div
                   key={item.id}
-                  className="
+                  className={`
                     overflow-hidden
                     rounded-2xl
                     border
-                    border-base-300
                     bg-base-100
                     shadow-sm
-                  "
+                    transition-all
+                    duration-200
+                    ${
+                      item.selected
+                        ? "border-primary/50 ring-1 ring-primary/10"
+                        : "border-base-300"
+                    }
+                  `}
                 >
-                  <div className="flex gap-4 p-4 sm:p-5">
-                    {/* PRODUCT IMAGE */}
+
+                  {/* =================================================
+                      PRODUCT
+                  ================================================= */}
+
+                  <div className="flex gap-3 p-4 sm:gap-4 sm:p-5">
+
+                    {/* =================================================
+                        CHECKBOX
+                    ================================================= */}
+
+                    <div className="flex shrink-0 items-start pt-1">
+                      <input
+                        type="checkbox"
+                        checked={item.selected === true}
+                        onChange={() => toggleSelection(item.id)}
+                        className="checkbox checkbox-primary checkbox-sm sm:checkbox-md"
+                        aria-label={`Select ${item.name} for purchase`}
+                      />
+                    </div>
+
+                    {/* =================================================
+                        IMAGE
+                    ================================================= */}
 
                     <div
                       className="
@@ -216,11 +311,18 @@ const Cart = () => {
                       )}
                     </div>
 
-                    {/* PRODUCT INFORMATION */}
+                    {/* =================================================
+                        INFORMATION
+                    ================================================= */}
 
                     <div className="min-w-0 flex-1">
+
+                      {/* PRODUCT TITLE + REMOVE */}
+
                       <div className="flex items-start justify-between gap-3">
+
                         <div className="min-w-0">
+
                           {item.store && (
                             <p className="mb-1 truncate text-xs font-bold text-primary">
                               {item.store}
@@ -234,6 +336,19 @@ const Cart = () => {
                           {item.brand && (
                             <p className="mt-1 truncate text-xs text-base-content/60">
                               {item.brand}
+                            </p>
+                          )}
+
+                          {/* SELECTED STATUS */}
+
+                          {item.selected ? (
+                            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
+                              <FaCheck className="text-[8px]" />
+                              Selected for purchase
+                            </div>
+                          ) : (
+                            <p className="mt-2 text-[11px] font-medium text-base-content/40">
+                              Saved in cart
                             </p>
                           )}
                         </div>
@@ -263,9 +378,14 @@ const Cart = () => {
                         </button>
                       </div>
 
-                      {/* PRICE + QUANTITY */}
+                      {/* =================================================
+                          PRICE + QUANTITY
+                      ================================================= */}
 
                       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+
+                        {/* PRICE */}
+
                         <div>
                           <p className="text-lg font-extrabold text-primary">
                             ৳ {price.toLocaleString()}
@@ -352,7 +472,9 @@ const Cart = () => {
                     </div>
                   </div>
 
-                  {/* VIEW PRODUCT */}
+                  {/* =====================================================
+                      VIEW PRODUCT
+                  ===================================================== */}
 
                   {item.url && (
                     <div className="border-t border-base-300 px-4 py-3 sm:px-5">
@@ -397,21 +519,34 @@ const Cart = () => {
                 sm:p-6
               "
             >
+
               <h2 className="text-xl font-extrabold text-base-content">
                 Cart Summary
               </h2>
 
               <div className="my-5 h-px bg-base-300" />
 
-              {/* ITEMS */}
+              {/* CART ITEMS */}
 
               <div className="flex items-center justify-between text-sm">
                 <span className="text-base-content/60">
-                  Items
+                  Cart Items
                 </span>
 
                 <span className="font-bold text-base-content">
-                  {cartCount}
+                  {cartItemCount}
+                </span>
+              </div>
+
+              {/* SELECTED ITEMS */}
+
+              <div className="mt-4 flex items-center justify-between text-sm">
+                <span className="text-base-content/60">
+                  Selected Items
+                </span>
+
+                <span className="font-bold text-primary">
+                  {selectedItemCount}
                 </span>
               </div>
 
@@ -419,7 +554,7 @@ const Cart = () => {
 
               <div className="mt-4 flex items-center justify-between text-sm">
                 <span className="text-base-content/60">
-                  Subtotal
+                  Selected Subtotal
                 </span>
 
                 <span className="font-bold text-base-content">
@@ -429,12 +564,12 @@ const Cart = () => {
 
               {/* SHIPPING */}
 
-              <div className="mt-4 flex items-center justify-between text-sm">
+              <div className="mt-4 flex items-center justify-between gap-4 text-sm">
                 <span className="text-base-content/60">
                   Shipping
                 </span>
 
-                <span className="font-semibold text-success">
+                <span className="text-right font-semibold text-success">
                   Calculated by store
                 </span>
               </div>
@@ -457,6 +592,7 @@ const Cart = () => {
 
               <button
                 type="button"
+                disabled={selectedItemCount === 0}
                 className="
                   mt-6
                   w-full
@@ -471,9 +607,13 @@ const Cart = () => {
                   duration-200
                   hover:bg-accent
                   hover:shadow-md
+                  disabled:cursor-not-allowed
+                  disabled:opacity-40
                 "
               >
-                Proceed to Checkout
+                {selectedItemCount === 0
+                  ? "Select Items to Checkout"
+                  : `Proceed to Checkout (${selectedItemCount})`}
               </button>
 
               {/* CONTINUE SHOPPING */}
