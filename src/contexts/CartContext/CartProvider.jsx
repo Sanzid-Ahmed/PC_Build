@@ -64,9 +64,10 @@ const CartProvider = ({ children }) => {
           item.id === product.id
             ? {
                 ...item,
+                ...product,
+
                 quantity: item.quantity + 1,
 
-                // Keep the existing selection state
                 selected:
                   typeof item.selected === "boolean"
                     ? item.selected
@@ -84,12 +85,9 @@ const CartProvider = ({ children }) => {
         ...currentItems,
         {
           ...product,
+
           quantity: 1,
 
-          // Respect selected value if provided.
-          // BuildResult sends false.
-          // Normal product pages without selected
-          // will automatically become true.
           selected:
             typeof product.selected === "boolean"
               ? product.selected
@@ -236,12 +234,15 @@ const CartProvider = ({ children }) => {
 
   const cartTotal = useMemo(() => {
     return selectedItems.reduce(
-      (total, item) =>
-        total +
-        (Number(item.numericPrice) ||
+      (total, item) => {
+        const itemTotal =
+          Number(item.totalPrice) ||
+          Number(item.numericPrice) ||
           Number(item.price) ||
-          0) *
-          item.quantity,
+          0;
+
+        return total + itemTotal * item.quantity;
+      },
       0
     );
   }, [selectedItems]);

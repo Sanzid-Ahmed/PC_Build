@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+
 import {
   FaMinus,
   FaPlus,
@@ -8,7 +9,9 @@ import {
   FaExternalLinkAlt,
   FaCheck,
 } from "react-icons/fa";
+
 import { Link } from "react-router";
+
 import { useCart } from "../../hooks/useCart";
 
 const Cart = () => {
@@ -26,6 +29,22 @@ const Cart = () => {
     selectAll,
     deselectAll,
   } = useCart();
+
+
+
+
+
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
+
+      const handleCheckout = () => {
+    if (selectedItemCount === 0) {
+      return;
+    }
+
+    setShowSuccessPopup(true);
+  };
+
 
   // =====================================================
   // SELECT ALL / DESELECT ALL
@@ -213,6 +232,7 @@ const Cart = () => {
 
           <div className="space-y-4">
             {cartItems.map((item) => {
+
               // =================================================
               // IMAGE
               // =================================================
@@ -240,6 +260,20 @@ const Cart = () => {
                 Number(item.numericPrice) ||
                 Number(item.price) ||
                 0;
+
+              const bottleneckPercentage =
+                Number(item.bottleneck_percentage) || 0;
+
+              const bottleneckAmount =
+                Number(item.bottleneck_amount) ||
+                0;
+
+              const adjustedPrice =
+                Number(item.totalPrice) ||
+                price;
+
+              const quantityTotal =
+                adjustedPrice * item.quantity;
 
               return (
                 <div
@@ -320,7 +354,6 @@ const Cart = () => {
                       {/* PRODUCT TITLE + REMOVE */}
 
                       <div className="flex items-start justify-between gap-3">
-
                         <div className="min-w-0">
 
                           {item.store && (
@@ -387,14 +420,35 @@ const Cart = () => {
                         {/* PRICE */}
 
                         <div>
+
                           <p className="text-lg font-extrabold text-primary">
                             ৳ {price.toLocaleString()}
                           </p>
 
+                          {bottleneckPercentage > 0 && (
+                            <p className="mt-1 text-xs text-base-content/50">
+                              Bottleneck ({bottleneckPercentage}%): +৳{" "}
+                              {bottleneckAmount.toLocaleString("en-BD", {
+                                maximumFractionDigits: 0,
+                              })}
+                            </p>
+                          )}
+
+                          {bottleneckPercentage > 0 && (
+                            <p className="mt-1 text-sm font-bold text-base-content">
+                              Adjusted: ৳{" "}
+                              {adjustedPrice.toLocaleString("en-BD", {
+                                maximumFractionDigits: 0,
+                              })}
+                            </p>
+                          )}
+
                           {item.quantity > 1 && (
-                            <p className="text-xs text-base-content/50">
+                            <p className="mt-1 text-xs text-base-content/50">
                               ৳{" "}
-                              {(price * item.quantity).toLocaleString()}{" "}
+                              {quantityTotal.toLocaleString("en-BD", {
+                                maximumFractionDigits: 0,
+                              })}{" "}
                               total
                             </p>
                           )}
@@ -519,7 +573,6 @@ const Cart = () => {
                 sm:p-6
               "
             >
-
               <h2 className="text-xl font-extrabold text-base-content">
                 Cart Summary
               </h2>
@@ -592,6 +645,7 @@ const Cart = () => {
 
               <button
                 type="button"
+                onClick={handleCheckout}
                 disabled={selectedItemCount === 0}
                 className="
                   mt-6
@@ -609,6 +663,7 @@ const Cart = () => {
                   hover:shadow-md
                   disabled:cursor-not-allowed
                   disabled:opacity-40
+                  hover:cursor-pointer
                 "
               >
                 {selectedItemCount === 0
@@ -649,6 +704,116 @@ const Cart = () => {
           </aside>
         </div>
       </div>
+      {showSuccessPopup && (
+        <div
+          className="
+            fixed
+            inset-0
+            z-50
+            flex
+            items-center
+            justify-center
+            bg-black/50
+            px-4
+            backdrop-blur-sm
+          "
+          onClick={() => setShowSuccessPopup(false)}
+        >
+          <div
+            className="
+              w-full
+              max-w-md
+              rounded-3xl
+              border
+              border-base-300
+              bg-base-100
+              p-6
+              text-center
+              shadow-2xl
+              sm:p-8
+            "
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div
+              className="
+                mx-auto
+                flex
+                h-16
+                w-16
+                items-center
+                justify-center
+                rounded-full
+                bg-success/10
+                text-success
+              "
+            >
+              <FaCheck className="text-2xl" />
+            </div>
+
+            <h2
+              className="
+                mt-5
+                text-2xl
+                font-extrabold
+                text-base-content
+              "
+            >
+              Request Sent Successfully
+            </h2>
+
+            <p
+              className="
+                mt-3
+                text-sm
+                leading-6
+                text-base-content/60
+              "
+            >
+              Your PC build request has been sent successfully.
+              Our admin will review your selected components and
+              respond to your request.
+            </p>
+
+            <div
+              className="
+                mt-5
+                rounded-2xl
+                bg-base-200
+                px-4
+                py-3
+                text-sm
+                font-semibold
+                text-base-content/70
+              "
+            >
+              ⏳ Waiting for admin response
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowSuccessPopup(false)}
+              className="
+                mt-6
+                w-full
+                rounded-xl
+                bg-primary
+                px-5
+                py-3
+                text-sm
+                font-bold
+                text-primary-content
+                transition-all
+                duration-200
+                hover:bg-accent
+                hover:shadow-md
+                hover:cursor-pointer
+              "
+            >
+              Okay
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

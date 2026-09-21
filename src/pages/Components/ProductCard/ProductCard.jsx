@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+
 import {
   FaMicrochip,
   FaShoppingCart,
@@ -7,12 +8,18 @@ import {
   FaStore,
   FaExternalLinkAlt,
 } from "react-icons/fa";
+
 import { useCart } from "../../../hooks/useCart";
 
 const ProductCard = ({ product }) => {
   const [imageError, setImageError] = useState(false);
+
   const { addToCart } = useCart();
   const navigate = useNavigate();
+
+  /* =====================================================
+     PARSE IMAGES
+  ===================================================== */
 
   const image = useMemo(() => {
     let images = product?.images;
@@ -32,25 +39,17 @@ const ProductCard = ({ product }) => {
     return null;
   }, [product?.images]);
 
+  /* =====================================================
+     PRICE
+  ===================================================== */
+
   const price = Number(
     product?.numericPrice ?? product?.price ?? 0
   );
 
-  const oldPrice =
-    product?.old_price !== null &&
-    product?.old_price !== undefined &&
-    product?.old_price !== ""
-      ? Number(product.old_price)
-      : null;
-
-  const hasDiscount =
-    oldPrice !== null &&
-    oldPrice > 0 &&
-    oldPrice > price;
-
-  const discount = hasDiscount
-    ? Math.round(((oldPrice - price) / oldPrice) * 100)
-    : 0;
+  /* =====================================================
+     BOTTLENECK
+  ===================================================== */
 
   const getBottleneckPercentage = (category = "") => {
     const value = category.toLowerCase();
@@ -103,22 +102,66 @@ const ProductCard = ({ product }) => {
     return 0;
   };
 
-  const bottleneck = getBottleneckPercentage(
-    product?.category || ""
-  );
+  const bottleneckPercentage =
+    getBottleneckPercentage(product?.category || "");
 
   const bottleneckAmount =
-    price * (bottleneck / 100);
+    price * (bottleneckPercentage / 100);
 
   const totalPrice = price + bottleneckAmount;
 
+  /* =====================================================
+     OLD PRICE
+  ===================================================== */
+
+  const oldPrice =
+    product?.old_price !== null &&
+    product?.old_price !== undefined &&
+    product?.old_price !== ""
+      ? Number(product.old_price)
+      : null;
+
+  /* =====================================================
+     DISCOUNT
+  ===================================================== */
+
+  const hasDiscount =
+    oldPrice !== null &&
+    oldPrice > 0 &&
+    oldPrice > price;
+
+  const discount = hasDiscount
+    ? Math.round(
+        ((oldPrice - price) / oldPrice) * 100
+      )
+    : 0;
+
+  /* =====================================================
+     ADD TO CART
+  ===================================================== */
+
   const handleAddToCart = () => {
-    addToCart(product);
+    addToCart({
+      ...product,
+      mainPrice: price,
+      originalPrice: price,
+      bottleneck_percentage: bottleneckPercentage,
+      bottleneck_amount: bottleneckAmount,
+      totalPrice: totalPrice,
+    });
   };
+
+  /* =====================================================
+     VIEW DETAILS
+  ===================================================== */
 
   const handleViewDetails = () => {
     navigate(`/product/${product.id}`);
   };
+
+  /* =====================================================
+     RENDER
+  ===================================================== */
 
   return (
     <article
@@ -129,14 +172,21 @@ const ProductCard = ({ product }) => {
         min-w-0
         w-full
         flex-col
+
         overflow-hidden
+
         rounded-[clamp(0.75rem,1vw,1.25rem)]
+
         border
         border-base-300
+
         bg-base-100
+
         shadow-sm
+
         transition-all
         duration-300
+
         hover:-translate-y-1
         hover:border-primary/30
         hover:shadow-lg
@@ -151,8 +201,11 @@ const ProductCard = ({ product }) => {
           items-center
           justify-center
           overflow-hidden
+
           bg-base-200
+
           h-[clamp(10rem,14vw,13rem)]
+
           p-[clamp(0.6rem,1vw,1.25rem)]
         "
       >
@@ -162,14 +215,21 @@ const ProductCard = ({ product }) => {
               absolute
               left-[clamp(0.5rem,0.8vw,0.75rem)]
               top-[clamp(0.5rem,0.8vw,0.75rem)]
+
               z-10
+
               rounded-full
+
               bg-primary
+
               px-[clamp(0.4rem,0.6vw,0.7rem)]
               py-[clamp(0.2rem,0.35vw,0.3rem)]
+
               text-[clamp(0.5rem,0.65vw,0.7rem)]
               font-bold
+
               text-primary-content
+
               shadow-sm
             "
           >
@@ -184,18 +244,28 @@ const ProductCard = ({ product }) => {
               absolute
               right-[clamp(0.5rem,0.8vw,0.75rem)]
               top-[clamp(0.5rem,0.8vw,0.75rem)]
+
               z-10
+
               max-w-[55%]
+
               truncate
+
               rounded-full
+
               border
               border-base-300
+
               bg-base-100
+
               px-[clamp(0.4rem,0.6vw,0.7rem)]
               py-[clamp(0.2rem,0.35vw,0.3rem)]
+
               text-[clamp(0.5rem,0.65vw,0.7rem)]
               font-semibold
+
               text-primary
+
               shadow-sm
             "
           >
@@ -214,9 +284,12 @@ const ProductCard = ({ product }) => {
               h-full
               w-full
               max-w-full
+
               object-contain
+
               transition-transform
               duration-500
+
               group-hover:scale-105
             "
           />
@@ -224,18 +297,26 @@ const ProductCard = ({ product }) => {
           <div
             className="
               flex
+
               h-[clamp(4rem,6vw,6rem)]
               w-[clamp(4rem,6vw,6rem)]
+
               items-center
               justify-center
+
               rounded-[clamp(0.75rem,1vw,1rem)]
+
               bg-base-100
+
               text-primary
+
               shadow-sm
             "
           >
             <FaMicrochip
-              className="text-[clamp(2rem,3vw,3rem)]"
+              className="
+                text-[clamp(2rem,3vw,3rem)]
+              "
             />
           </div>
         )}
@@ -247,6 +328,7 @@ const ProductCard = ({ product }) => {
           min-w-0
           flex-1
           flex-col
+
           p-[clamp(0.7rem,1vw,1.15rem)]
         "
       >
@@ -255,16 +337,24 @@ const ProductCard = ({ product }) => {
             flex
             min-w-0
             items-center
+
             gap-[clamp(0.3rem,0.5vw,0.5rem)]
+
             text-[clamp(0.58rem,0.7vw,0.75rem)]
+
             font-semibold
+
             text-primary
           "
         >
           <FaStore className="shrink-0" />
+
           <span
             title={product?.store || "Unknown Store"}
-            className="min-w-0 truncate"
+            className="
+              min-w-0
+              truncate
+            "
           >
             {product?.store || "Unknown Store"}
           </span>
@@ -274,12 +364,19 @@ const ProductCard = ({ product }) => {
           title={product?.name || ""}
           className="
             mt-[clamp(0.35rem,0.6vw,0.65rem)]
+
             min-h-[clamp(2.35rem,3vw,3rem)]
+
             line-clamp-2
+
             break-words
+
             text-[clamp(0.75rem,0.9vw,1rem)]
+
             font-bold
+
             leading-[1.4]
+
             text-base-content
           "
         >
@@ -290,12 +387,16 @@ const ProductCard = ({ product }) => {
           <p
             className="
               mt-[clamp(0.35rem,0.6vw,0.6rem)]
+
               truncate
+
               text-[clamp(0.58rem,0.7vw,0.75rem)]
+
               text-base-content/60
             "
           >
             Brand:{" "}
+
             <span className="font-semibold text-base-content">
               {product.brand}
             </span>
@@ -308,16 +409,29 @@ const ProductCard = ({ product }) => {
             <div
               className="
                 mt-[clamp(0.45rem,0.7vw,0.7rem)]
+
                 flex
                 min-w-0
                 items-center
+
                 gap-[clamp(0.2rem,0.4vw,0.4rem)]
+
                 text-[clamp(0.65rem,0.8vw,0.85rem)]
               "
             >
-              <FaStar className="shrink-0 text-warning" />
+              <FaStar
+                className="
+                  shrink-0
+                  text-warning
+                "
+              />
 
-              <span className="font-semibold text-base-content">
+              <span
+                className="
+                  font-semibold
+                  text-base-content
+                "
+              >
                 {product.rating}
               </span>
 
@@ -333,46 +447,50 @@ const ProductCard = ({ product }) => {
             </div>
           )}
 
-        {bottleneck > 0 && (
-          <div
+        <div
+          className="
+            mt-[clamp(0.5rem,0.8vw,0.75rem)]
+
+            flex
+            items-center
+            justify-between
+
+            rounded-lg
+
+            border
+            border-primary/10
+
+            bg-primary/5
+
+            px-3
+            py-2
+          "
+        >
+          <span
             className="
-              mt-[clamp(0.5rem,0.7vw,0.75rem)]
-              flex
-              items-center
-              justify-between
-              rounded-lg
-              border
-              border-primary/10
-              bg-primary/5
-              px-3
-              py-2
+              text-[clamp(0.58rem,0.7vw,0.75rem)]
+              font-semibold
+              text-base-content/60
             "
           >
-            <span
-              className="
-                text-[clamp(0.58rem,0.7vw,0.75rem)]
-                font-semibold
-                text-base-content/60
-              "
-            >
-              Bottleneck
-            </span>
+            Bottleneck
+          </span>
 
-            <span
-              className="
-                text-[clamp(0.65rem,0.8vw,0.85rem)]
-                font-black
-                text-primary
-              "
-            >
-              {bottleneck}%
-            </span>
-          </div>
-        )}
+          <span
+            className="
+              text-[clamp(0.65rem,0.8vw,0.85rem)]
+              font-bold
+              text-primary
+            "
+          >
+            {bottleneckPercentage}%
+          </span>
+        </div>
 
         <div
           className="
             mt-auto
+
             pt-[clamp(0.75rem,1.2vw,1.25rem)]
           "
         >
@@ -382,6 +500,7 @@ const ProductCard = ({ product }) => {
               min-w-0
               flex-wrap
               items-end
+
               gap-x-[clamp(0.35rem,0.7vw,0.7rem)]
               gap-y-1
             "
@@ -389,9 +508,13 @@ const ProductCard = ({ product }) => {
             <span
               className="
                 min-w-0
+
                 text-[clamp(1rem,1.5vw,1.4rem)]
+
                 font-extrabold
+
                 leading-none
+
                 text-primary
               "
             >
@@ -402,8 +525,11 @@ const ProductCard = ({ product }) => {
               <span
                 className="
                   mb-0.5
+
                   text-[clamp(0.6rem,0.75vw,0.8rem)]
+
                   text-base-content/50
+
                   line-through
                 "
               >
@@ -412,30 +538,47 @@ const ProductCard = ({ product }) => {
             )}
           </div>
 
-          {bottleneck > 0 && (
-            <div className="mt-2 text-[clamp(0.55rem,0.65vw,0.7rem)] text-base-content/50">
-              Bottleneck adjustment:{" "}
-              <span className="font-semibold text-primary">
-                ৳ {bottleneckAmount.toLocaleString("en-BD", {
-                  maximumFractionDigits: 0,
-                })}
-              </span>
-              {" · "}
-              Total:{" "}
-              <span className="font-bold text-base-content">
-                ৳ {totalPrice.toLocaleString("en-BD", {
-                  maximumFractionDigits: 0,
-                })}
-              </span>
-            </div>
-          )}
+          <div
+            className="
+              mt-1
+
+              text-[clamp(0.55rem,0.65vw,0.7rem)]
+
+              text-base-content/50
+            "
+          >
+            + ৳{" "}
+            {bottleneckAmount.toLocaleString("en-BD", {
+              maximumFractionDigits: 0,
+            })}{" "}
+            bottleneck adjustment
+          </div>
+
+          <div
+            className="
+              mt-1
+
+              text-[clamp(0.6rem,0.7vw,0.75rem)]
+
+              font-semibold
+
+              text-base-content/70
+            "
+          >
+            Total with adjustment: ৳{" "}
+            {totalPrice.toLocaleString("en-BD", {
+              maximumFractionDigits: 0,
+            })}
+          </div>
 
           <div
             className="
               mt-[clamp(0.6rem,0.9vw,1rem)]
+
               flex
               min-w-0
               w-full
+
               gap-[clamp(0.35rem,0.6vw,0.6rem)]
             "
           >
@@ -446,21 +589,33 @@ const ProductCard = ({ product }) => {
                 flex
                 min-w-0
                 flex-1
+
                 items-center
                 justify-center
+
                 gap-[clamp(0.25rem,0.4vw,0.45rem)]
+
                 rounded-xl
+
                 bg-primary
+
                 px-[clamp(0.4rem,0.7vw,0.8rem)]
                 py-[clamp(0.6rem,0.8vw,0.75rem)]
+
                 text-[clamp(0.6rem,0.75vw,0.82rem)]
+
                 font-bold
+
                 whitespace-nowrap
+
                 text-primary-content
+
                 transition-all
                 duration-200
+
                 hover:bg-accent
                 hover:shadow-md
+
                 active:scale-[0.98]
               "
             >
@@ -471,6 +626,7 @@ const ProductCard = ({ product }) => {
               <FaExternalLinkAlt
                 className="
                   shrink-0
+
                   text-[clamp(0.5rem,0.65vw,0.7rem)]
                 "
               />
@@ -485,19 +641,28 @@ const ProductCard = ({ product }) => {
                 flex
                 h-[clamp(2.5rem,3.2vw,3rem)]
                 w-[clamp(2.5rem,3.2vw,3rem)]
+
                 shrink-0
+
                 items-center
                 justify-center
+
                 rounded-xl
+
                 border
                 border-primary
+
                 bg-base-100
+
                 text-primary
+
                 transition-all
                 duration-200
+
                 hover:bg-primary
                 hover:text-primary-content
                 hover:shadow-md
+
                 active:scale-95
               "
             >
