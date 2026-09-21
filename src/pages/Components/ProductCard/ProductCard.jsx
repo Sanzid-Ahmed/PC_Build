@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+
 import { useNavigate } from "react-router";
 
 import {
@@ -48,6 +49,75 @@ const ProductCard = ({ product }) => {
   );
 
   /* =====================================================
+     BOTTLENECK
+  ===================================================== */
+
+  const getBottleneckPercentage = (category = "") => {
+    const value = category.toLowerCase();
+
+    // Processor / CPU
+    if (
+      value.includes("processor") ||
+      value.includes("cpu")
+    ) {
+      return 2.5;
+    }
+
+    // Graphics Card / GPU
+    if (
+      value.includes("graphics") ||
+      value.includes("gpu") ||
+      value.includes("video card")
+    ) {
+      return 2;
+    }
+
+    // Motherboard / RAM / PSU
+    if (
+      value.includes("motherboard") ||
+      value.includes("ram") ||
+      value.includes("memory") ||
+      value.includes("power supply") ||
+      value.includes("psu")
+    ) {
+      return 1;
+    }
+
+    // SSD / HDD / Cooler
+    if (
+      value.includes("ssd") ||
+      value.includes("hdd") ||
+      value.includes("hard disk") ||
+      value.includes("cooler") ||
+      value.includes("cooling")
+    ) {
+      return 0.75;
+    }
+
+    // Casing / Monitor / Keyboard / Mouse
+    if (
+      value.includes("casing") ||
+      value.includes("case") ||
+      value.includes("monitor") ||
+      value.includes("keyboard") ||
+      value.includes("mouse")
+    ) {
+      return 0.5;
+    }
+
+    return 0;
+  };
+
+  const bottleneckPercentage =
+    getBottleneckPercentage(product?.category || "");
+
+  const bottleneckAmount =
+    price * (bottleneckPercentage / 100);
+
+  const totalPrice =
+    price + bottleneckAmount;
+
+  /* =====================================================
      OLD PRICE
   ===================================================== */
 
@@ -78,7 +148,20 @@ const ProductCard = ({ product }) => {
   ===================================================== */
 
   const handleAddToCart = () => {
-    addToCart(product);
+    addToCart({
+      ...product,
+
+      // Original product price
+      mainPrice: price,
+      originalPrice: price,
+
+      // Bottleneck information
+      bottleneck_percentage: bottleneckPercentage,
+      bottleneck_amount: bottleneckAmount,
+
+      // Final price including bottleneck adjustment
+      totalPrice: totalPrice,
+    });
   };
 
   /* =====================================================
@@ -102,21 +185,14 @@ const ProductCard = ({ product }) => {
         min-w-0
         w-full
         flex-col
-
         overflow-hidden
-
         rounded-[clamp(0.75rem,1vw,1.25rem)]
-
         border
         border-base-300
-
         bg-base-100
-
         shadow-sm
-
         transition-all
         duration-300
-
         hover:-translate-y-1
         hover:border-primary/30
         hover:shadow-lg
@@ -135,11 +211,8 @@ const ProductCard = ({ product }) => {
           items-center
           justify-center
           overflow-hidden
-
           bg-base-200
-
           h-[clamp(10rem,14vw,13rem)]
-
           p-[clamp(0.6rem,1vw,1.25rem)]
         "
       >
@@ -153,21 +226,14 @@ const ProductCard = ({ product }) => {
               absolute
               left-[clamp(0.5rem,0.8vw,0.75rem)]
               top-[clamp(0.5rem,0.8vw,0.75rem)]
-
               z-10
-
               rounded-full
-
               bg-primary
-
               px-[clamp(0.4rem,0.6vw,0.7rem)]
               py-[clamp(0.2rem,0.35vw,0.3rem)]
-
               text-[clamp(0.5rem,0.65vw,0.7rem)]
               font-bold
-
               text-primary-content
-
               shadow-sm
             "
           >
@@ -186,28 +252,18 @@ const ProductCard = ({ product }) => {
               absolute
               right-[clamp(0.5rem,0.8vw,0.75rem)]
               top-[clamp(0.5rem,0.8vw,0.75rem)]
-
               z-10
-
               max-w-[55%]
-
               truncate
-
               rounded-full
-
               border
               border-base-300
-
               bg-base-100
-
               px-[clamp(0.4rem,0.6vw,0.7rem)]
               py-[clamp(0.2rem,0.35vw,0.3rem)]
-
               text-[clamp(0.5rem,0.65vw,0.7rem)]
               font-semibold
-
               text-primary
-
               shadow-sm
             "
           >
@@ -230,12 +286,9 @@ const ProductCard = ({ product }) => {
               h-full
               w-full
               max-w-full
-
               object-contain
-
               transition-transform
               duration-500
-
               group-hover:scale-105
             "
           />
@@ -243,19 +296,13 @@ const ProductCard = ({ product }) => {
           <div
             className="
               flex
-
               h-[clamp(4rem,6vw,6rem)]
               w-[clamp(4rem,6vw,6rem)]
-
               items-center
               justify-center
-
               rounded-[clamp(0.75rem,1vw,1rem)]
-
               bg-base-100
-
               text-primary
-
               shadow-sm
             "
           >
@@ -268,9 +315,9 @@ const ProductCard = ({ product }) => {
         )}
       </div>
 
-      {/* =================================================
+      {/* =====================================================
           INFORMATION
-      ================================================= */}
+      ===================================================== */}
 
       <div
         className="
@@ -278,7 +325,6 @@ const ProductCard = ({ product }) => {
           min-w-0
           flex-1
           flex-col
-
           p-[clamp(0.7rem,1vw,1.15rem)]
         "
       >
@@ -291,13 +337,9 @@ const ProductCard = ({ product }) => {
             flex
             min-w-0
             items-center
-
             gap-[clamp(0.3rem,0.5vw,0.5rem)]
-
             text-[clamp(0.58rem,0.7vw,0.75rem)]
-
             font-semibold
-
             text-primary
           "
         >
@@ -322,19 +364,12 @@ const ProductCard = ({ product }) => {
           title={product?.name || ""}
           className="
             mt-[clamp(0.35rem,0.6vw,0.65rem)]
-
             min-h-[clamp(2.35rem,3vw,3rem)]
-
             line-clamp-2
-
             break-words
-
             text-[clamp(0.75rem,0.9vw,1rem)]
-
             font-bold
-
             leading-[1.4]
-
             text-base-content
           "
         >
@@ -349,16 +384,12 @@ const ProductCard = ({ product }) => {
           <p
             className="
               mt-[clamp(0.35rem,0.6vw,0.6rem)]
-
               truncate
-
               text-[clamp(0.58rem,0.7vw,0.75rem)]
-
               text-base-content/60
             "
           >
             Brand:{" "}
-
             <span className="font-semibold text-base-content">
               {product.brand}
             </span>
@@ -375,13 +406,10 @@ const ProductCard = ({ product }) => {
             <div
               className="
                 mt-[clamp(0.45rem,0.7vw,0.7rem)]
-
                 flex
                 min-w-0
                 items-center
-
                 gap-[clamp(0.2rem,0.4vw,0.4rem)]
-
                 text-[clamp(0.65rem,0.8vw,0.85rem)]
               "
             >
@@ -414,13 +442,51 @@ const ProductCard = ({ product }) => {
           )}
 
         {/* =================================================
+            BOTTLENECK
+        ================================================= */}
+
+        <div
+          className="
+            mt-[clamp(0.5rem,0.8vw,0.75rem)]
+            flex
+            items-center
+            justify-between
+            rounded-lg
+            border
+            border-primary/10
+            bg-primary/5
+            px-3
+            py-2
+          "
+        >
+          <span
+            className="
+              text-[clamp(0.58rem,0.7vw,0.75rem)]
+              font-semibold
+              text-base-content/60
+            "
+          >
+            Bottleneck
+          </span>
+
+          <span
+            className="
+              text-[clamp(0.65rem,0.8vw,0.85rem)]
+              font-bold
+              text-primary
+            "
+          >
+            {bottleneckPercentage}%
+          </span>
+        </div>
+
+        {/* =================================================
             PRICE + BUTTONS
         ================================================= */}
 
         <div
           className="
             mt-auto
-
             pt-[clamp(0.75rem,1.2vw,1.25rem)]
           "
         >
@@ -434,7 +500,6 @@ const ProductCard = ({ product }) => {
               min-w-0
               flex-wrap
               items-end
-
               gap-x-[clamp(0.35rem,0.7vw,0.7rem)]
               gap-y-1
             "
@@ -442,13 +507,9 @@ const ProductCard = ({ product }) => {
             <span
               className="
                 min-w-0
-
                 text-[clamp(1rem,1.5vw,1.4rem)]
-
                 font-extrabold
-
                 leading-none
-
                 text-primary
               "
             >
@@ -459,11 +520,8 @@ const ProductCard = ({ product }) => {
               <span
                 className="
                   mb-0.5
-
                   text-[clamp(0.6rem,0.75vw,0.8rem)]
-
                   text-base-content/50
-
                   line-through
                 "
               >
@@ -473,22 +531,51 @@ const ProductCard = ({ product }) => {
           </div>
 
           {/* =================================================
-              BUTTONS
+              BOTTLENECK AMOUNT
+          ================================================= */}
 
-              IMPORTANT:
-              - Details gets flexible width
-              - Cart stays fixed
-              - Details text NEVER truncates
+          <div
+            className="
+              mt-1
+              text-[clamp(0.55rem,0.65vw,0.7rem)]
+              text-base-content/50
+            "
+          >
+            + ৳{" "}
+            {bottleneckAmount.toLocaleString("en-BD", {
+              maximumFractionDigits: 0,
+            })}{" "}
+            bottleneck adjustment
+          </div>
+
+          {/* =================================================
+              TOTAL PRICE
+          ================================================= */}
+
+          <div
+            className="
+              mt-1
+              text-[clamp(0.6rem,0.7vw,0.75rem)]
+              font-semibold
+              text-base-content/70
+            "
+          >
+            Total with adjustment: ৳{" "}
+            {totalPrice.toLocaleString("en-BD", {
+              maximumFractionDigits: 0,
+            })}
+          </div>
+
+          {/* =================================================
+              BUTTONS
           ================================================= */}
 
           <div
             className="
               mt-[clamp(0.6rem,0.9vw,1rem)]
-
               flex
               min-w-0
               w-full
-
               gap-[clamp(0.35rem,0.6vw,0.6rem)]
             "
           >
@@ -503,33 +590,21 @@ const ProductCard = ({ product }) => {
                 flex
                 min-w-0
                 flex-1
-
                 items-center
                 justify-center
-
                 gap-[clamp(0.25rem,0.4vw,0.45rem)]
-
                 rounded-xl
-
                 bg-primary
-
                 px-[clamp(0.4rem,0.7vw,0.8rem)]
                 py-[clamp(0.6rem,0.8vw,0.75rem)]
-
                 text-[clamp(0.6rem,0.75vw,0.82rem)]
-
                 font-bold
-
                 whitespace-nowrap
-
                 text-primary-content
-
                 transition-all
                 duration-200
-
                 hover:bg-accent
                 hover:shadow-md
-
                 active:scale-[0.98]
               "
             >
@@ -540,7 +615,6 @@ const ProductCard = ({ product }) => {
               <FaExternalLinkAlt
                 className="
                   shrink-0
-
                   text-[clamp(0.5rem,0.65vw,0.7rem)]
                 "
               />
@@ -559,28 +633,19 @@ const ProductCard = ({ product }) => {
                 flex
                 h-[clamp(2.5rem,3.2vw,3rem)]
                 w-[clamp(2.5rem,3.2vw,3rem)]
-
                 shrink-0
-
                 items-center
                 justify-center
-
                 rounded-xl
-
                 border
                 border-primary
-
                 bg-base-100
-
                 text-primary
-
                 transition-all
                 duration-200
-
                 hover:bg-primary
                 hover:text-primary-content
                 hover:shadow-md
-
                 active:scale-95
               "
             >
