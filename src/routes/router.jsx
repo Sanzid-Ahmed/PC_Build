@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
                 Component: Home
             },
             {
-                path:"/components",
+                path:"components",
                 Component: Components
             },
             {
@@ -35,16 +35,16 @@ export const router = createBrowserRouter([
                 element: <ProductDetails />
             },
             {
-                path:"/build-pc", 
+                path:"build-pc", 
                 element: <PrivateRoute><BuildPC /></PrivateRoute>
             },
             {
-                path: "/about-us",
+                path: "about-us",
                 Component: AboutUs,
                 loader: ()=> fetch('/warehouses.json').then(res => res.json())
             },
             {
-                path:"/cart",
+                path:"cart",
                 element: <Cart />
             }
         ]
