@@ -534,7 +534,7 @@ const ProductCard = ({ product }) => {
               BOTTLENECK AMOUNT
           ================================================= */}
 
-          <div
+          {/* <div
             className="
               mt-1
               text-[clamp(0.55rem,0.65vw,0.7rem)]
@@ -546,7 +546,7 @@ const ProductCard = ({ product }) => {
               maximumFractionDigits: 0,
             })}{" "}
             bottleneck adjustment
-          </div>
+          </div> */}
 
           {/* =================================================
               TOTAL PRICE
