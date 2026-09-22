@@ -445,7 +445,7 @@ const ProductCard = ({ product }) => {
             BOTTLENECK
         ================================================= */}
 
-        <div
+        {/* <div
           className="
             mt-[clamp(0.5rem,0.8vw,0.75rem)]
             flex
@@ -478,7 +478,7 @@ const ProductCard = ({ product }) => {
           >
             {bottleneckPercentage}%
           </span>
-        </div>
+        </div> */}
 
         {/* =================================================
             PRICE + BUTTONS
@@ -534,7 +534,7 @@ const ProductCard = ({ product }) => {
               BOTTLENECK AMOUNT
           ================================================= */}
 
-          {/* <div
+          <div
             className="
               mt-1
               text-[clamp(0.55rem,0.65vw,0.7rem)]
@@ -546,7 +546,7 @@ const ProductCard = ({ product }) => {
               maximumFractionDigits: 0,
             })}{" "}
             bottleneck adjustment
-          </div> */}
+          </div>
 
           {/* =================================================
               TOTAL PRICE
