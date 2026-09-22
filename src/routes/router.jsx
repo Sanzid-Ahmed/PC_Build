@@ -16,40 +16,53 @@ import AdminLayout from "../layouts/AdminLayout";
 import Dashbord from "../pages/Admin/Dashbord/Dashbord";
 import Manageuser from "../pages/Admin/Manageuser/Manageuser";
 import AdminAuthLayout from "../layouts/AdminAuthLayout";
+import OrderDetails from "../pages/Admin/OrderDetails/OrderDetails";
+import MyOrders from "../pages/MyOrders/MyOrders";
 
 export const router = createBrowserRouter([
-    {
-        path: "/",
-        Component: RootLayout,
-        children: [
-            {
-                index: true,
-                Component: Home
-            },
-            {
-                path:"components",
-                Component: Components
-            },
-            {
-                path: "product/:id",
-                element: <ProductDetails />
-            },
-            {
-                path:"build-pc", 
-                element: <PrivateRoute><BuildPC /></PrivateRoute>
-            },
-            {
-                path: "about-us",
-                Component: AboutUs,
-                loader: ()=> fetch('/warehouses.json').then(res => res.json())
-            },
-            {
-                path:"cart",
-                element: <Cart />
-            }
-        ]
-    },
-    {
+  {
+    path: "/",
+    Component: RootLayout,
+    children: [
+      {
+        index: true,
+        Component: Home,
+      },
+      {
+        path: "components",
+        Component: Components,
+      },
+      {
+        path: "product/:id",
+        element: <ProductDetails />,
+      },
+      {
+        path: "build-pc",
+        element: (
+          <PrivateRoute>
+            <BuildPC />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "about-us",
+        Component: AboutUs,
+        loader: () => fetch("/warehouses.json").then((res) => res.json()),
+      },
+      {
+        path: "cart",
+        element: <Cart />,
+      },
+      {
+        path: "my-orders",
+        element: 
+         <PrivateRoute>
+          <MyOrders />
+         </PrivateRoute>
+      },
+    ],
+  },
+  {
     path: "/",
     Component: AuthLayout,
     children: [
@@ -64,7 +77,7 @@ export const router = createBrowserRouter([
       },
     ],
   },
-   {
+  {
     path: "/",
     Component: AdminAuthLayout,
     children: [
@@ -83,15 +96,22 @@ export const router = createBrowserRouter([
     path: "/admin",
     Component: AdminLayout,
     children: [
+      // {
+      //   index: true,
+      //   Component: Dashbord,
+      // },
+      // {
+      //   path: "users",
+      //   Component: Manageuser,
+      // },
       {
         index: true,
-        Component: Dashbord,
-      },
-
-      {
-        path: "users",
         Component: Manageuser,
+      },
+      {
+        path: "manage-orders/:orderId",
+        element: <OrderDetails />,
       },
     ],
   },
-])
+]);

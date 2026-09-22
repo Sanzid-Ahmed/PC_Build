@@ -25,16 +25,22 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
   };
 
   const navLinks = [
-    {
-      name: "Dashboard",
-      path: "/admin",
-      icon: LayoutDashboard,
-      end: true,
-    },
+    // {
+    //   name: "Dashboard",
+    //   path: "/admin",
+    //   icon: LayoutDashboard,
+    //   end: true,
+    // },
+    // {
+    //   name: "Manage Users",
+    //   path: "/admin/users",
+    //   icon: Users,
+    // },
     {
       name: "Manage Users",
-      path: "/admin/users",
+      path: "/admin",
       icon: Users,
+      end: true,
     },
   ];
 

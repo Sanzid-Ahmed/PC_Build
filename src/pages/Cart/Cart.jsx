@@ -13,6 +13,8 @@ import {
 import { Link } from "react-router";
 
 import { useCart } from "../../hooks/useCart";
+import useAuth from "../../hooks/useAuth";
+import useApi from "../../hooks/useApi";
 
 const Cart = () => {
   const {
@@ -30,21 +32,45 @@ const Cart = () => {
     deselectAll,
   } = useCart();
 
+  const { user } = useAuth();
+  const api = useApi();
 
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
-
-
-    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-
-
-      const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (selectedItemCount === 0) {
       return;
     }
 
-    setShowSuccessPopup(true);
-  };
+    if (!user) {
+      alert("Please login before checkout.");
+      return;
+    }
 
+    const selectedItems = cartItems.filter((item) => item.selected);
+
+    const products = selectedItems.map((item) => ({
+      product_id: Number(item.id),
+      product_price:
+        Number(item.totalPrice) ||
+        Number(item.numericPrice) ||
+        Number(item.price) ||
+        0,
+      quantity: Number(item.quantity) || 1,
+    }));
+
+    try {
+      await api.post("/api/orders/", {
+        firebase_id: user.uid,
+        products: products,
+      });
+
+      setShowSuccessPopup(true);
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert("Failed to send order. Please try again.");
+    }
+  };
 
   // =====================================================
   // SELECT ALL / DESELECT ALL
@@ -128,7 +154,6 @@ const Cart = () => {
   return (
     <main className="min-h-screen bg-base-100 px-3 pb-16 pt-28 sm:px-5 sm:pb-20 sm:pt-32">
       <div className="mx-auto w-full xl:w-10/12">
-
         {/* =====================================================
             HEADER
         ===================================================== */}
@@ -144,8 +169,8 @@ const Cart = () => {
             </h1>
 
             <p className="mt-2 text-sm text-base-content/60 sm:text-base">
-              {cartItemCount}{" "}
-              {cartItemCount === 1 ? "item" : "items"} in your cart
+              {cartItemCount} {cartItemCount === 1 ? "item" : "items"} in your
+              cart
             </p>
           </div>
 
@@ -213,9 +238,7 @@ const Cart = () => {
           </label>
 
           <div className="text-sm text-base-content/60">
-            <span className="font-bold text-primary">
-              {selectedItemCount}
-            </span>{" "}
+            <span className="font-bold text-primary">{selectedItemCount}</span>{" "}
             {selectedItemCount === 1 ? "item" : "items"} selected for purchase
           </div>
         </div>
@@ -225,14 +248,12 @@ const Cart = () => {
         ===================================================== */}
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-
           {/* ===================================================
               PRODUCTS
           =================================================== */}
 
           <div className="space-y-4">
             {cartItems.map((item) => {
-
               // =================================================
               // IMAGE
               // =================================================
@@ -248,32 +269,23 @@ const Cart = () => {
               }
 
               const image =
-                Array.isArray(images) && images.length > 0
-                  ? images[0]
-                  : null;
+                Array.isArray(images) && images.length > 0 ? images[0] : null;
 
               // =================================================
               // PRICE
               // =================================================
 
               const price =
-                Number(item.numericPrice) ||
-                Number(item.price) ||
-                0;
+                Number(item.numericPrice) || Number(item.price) || 0;
 
               const bottleneckPercentage =
                 Number(item.bottleneck_percentage) || 0;
 
-              const bottleneckAmount =
-                Number(item.bottleneck_amount) ||
-                0;
+              const bottleneckAmount = Number(item.bottleneck_amount) || 0;
 
-              const adjustedPrice =
-                Number(item.totalPrice) ||
-                price;
+              const adjustedPrice = Number(item.totalPrice) || price;
 
-              const quantityTotal =
-                adjustedPrice * item.quantity;
+              const quantityTotal = adjustedPrice * item.quantity;
 
               return (
                 <div
@@ -293,13 +305,11 @@ const Cart = () => {
                     }
                   `}
                 >
-
                   {/* =================================================
                       PRODUCT
                   ================================================= */}
 
                   <div className="flex gap-3 p-4 sm:gap-4 sm:p-5">
-
                     {/* =================================================
                         CHECKBOX
                     ================================================= */}
@@ -350,12 +360,10 @@ const Cart = () => {
                     ================================================= */}
 
                     <div className="min-w-0 flex-1">
-
                       {/* PRODUCT TITLE + REMOVE */}
 
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-
                           {item.store && (
                             <p className="mb-1 truncate text-xs font-bold text-primary">
                               {item.store}
@@ -416,11 +424,9 @@ const Cart = () => {
                       ================================================= */}
 
                       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-
                         {/* PRICE */}
 
                         <div>
-
                           <p className="text-lg font-extrabold text-primary">
                             ৳ {price.toLocaleString()}
                           </p>
@@ -582,9 +588,7 @@ const Cart = () => {
               {/* CART ITEMS */}
 
               <div className="flex items-center justify-between text-sm">
-                <span className="text-base-content/60">
-                  Cart Items
-                </span>
+                <span className="text-base-content/60">Cart Items</span>
 
                 <span className="font-bold text-base-content">
                   {cartItemCount}
@@ -594,9 +598,7 @@ const Cart = () => {
               {/* SELECTED ITEMS */}
 
               <div className="mt-4 flex items-center justify-between text-sm">
-                <span className="text-base-content/60">
-                  Selected Items
-                </span>
+                <span className="text-base-content/60">Selected Items</span>
 
                 <span className="font-bold text-primary">
                   {selectedItemCount}
@@ -606,9 +608,7 @@ const Cart = () => {
               {/* SUBTOTAL */}
 
               <div className="mt-4 flex items-center justify-between text-sm">
-                <span className="text-base-content/60">
-                  Selected Subtotal
-                </span>
+                <span className="text-base-content/60">Selected Subtotal</span>
 
                 <span className="font-bold text-base-content">
                   ৳ {cartTotal.toLocaleString()}
@@ -618,9 +618,7 @@ const Cart = () => {
               {/* SHIPPING */}
 
               <div className="mt-4 flex items-center justify-between gap-4 text-sm">
-                <span className="text-base-content/60">
-                  Shipping
-                </span>
+                <span className="text-base-content/60">Shipping</span>
 
                 <span className="text-right font-semibold text-success">
                   Calculated by store
@@ -769,9 +767,8 @@ const Cart = () => {
                 text-base-content/60
               "
             >
-              Your PC build request has been sent successfully.
-              Our admin will review your selected components and
-              respond to your request.
+              Your PC build request has been sent successfully. Our admin will
+              review your selected components and respond to your request.
             </p>
 
             <div

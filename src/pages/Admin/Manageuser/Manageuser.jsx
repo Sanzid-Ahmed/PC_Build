@@ -1,213 +1,307 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useState } from "react";
-import useApi from "../../../hooks/useApi";
-import {
-  Search,
-  UserCheck,
-  Shield,
-  Trash2,
-  AlertCircle,
-  CheckCircle2,
-  RefreshCw,
-} from "lucide-react";
+import { useNavigate } from "react-router";
+import useOrders from "../../../hooks/useOrders";
 
-const Manageuser = () => {
-  const api = useApi();
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+const ManageUser = () => {
+  const { orders, loading, error, getAllOrders } = useOrders();
 
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      setErrorMessage("");
-      const response = await api.get("/api/users");
-      setUsers(response.data || []);
-    } catch (err) {
-      console.error("Failed to load users:", err);
-      setErrorMessage("Could not fetch user records.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const navigate = useNavigate();
+
+  // =========================================================
+  // LOAD ALL ORDERS
+  // =========================================================
 
   useEffect(() => {
-    fetchUsers();
+    getAllOrders();
   }, []);
 
-  // Role toggle handler
-  const handleRoleChange = async (userId, currentRole) => {
-    const newRole = currentRole === "admin" ? "user" : "admin";
-    try {
-      await api.patch(`/api/users/${userId}/role`, { role: newRole });
-      setUsers((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, role: newRole } : u))
-      );
-    } catch (err) {
-      console.error("Role update failed:", err);
-    }
+  // =========================================================
+  // FORMAT DATE
+  // =========================================================
+
+  const formatDate = (date) => {
+    if (!date) return "N/A";
+
+    return new Date(date).toLocaleString();
   };
 
-  // User deletion handler
-  const handleDeleteUser = async (userId) => {
-    if (!window.confirm("Are you sure you want to remove this user?")) return;
+  // =========================================================
+  // CLOSE DETAILS MODAL
+  // =========================================================
 
-    try {
-      await api.delete(`/api/users/${userId}`);
-      setUsers((prev) => prev.filter((u) => u._id !== userId));
-    } catch (err) {
-      console.error("Failed to delete user:", err);
-    }
+  const closeDetails = () => {
+    setSelectedOrder(null);
   };
-
-  // Filter users by search input
-  const filteredUsers = users.filter(
-    (u) =>
-      u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      {/* <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-base-content sm:text-3xl">
-            User Management
-          </h1>
-          <p className="text-xs text-base-content/60 mt-1">
-            Manage registered accounts, assign administrative rights, and enforce access roles.
-          </p>
-        </div>
-        <button
-          onClick={fetchUsers}
-          className="btn btn-outline btn-sm rounded-xl gap-2 text-xs"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-          Refresh
-        </button>
+    <div className="p-6">
+      {/* =====================================================
+          PAGE HEADER
+      ===================================================== */}
+
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Manage Orders</h1>
+
+        <p className="text-gray-500 mt-1">View and manage customer orders</p>
       </div>
 
-      {/* Filter and Search Toolbar */}
-      {/* <div className="flex items-center justify-between gap-4 rounded-2xl border border-base-content/10 bg-base-100/80 p-4 backdrop-blur-xl">
-        <div className="relative w-full max-w-xs">
-          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-base-content/40" />
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input input-sm input-bordered w-full pl-9 text-xs bg-base-200/50 focus:bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary/40"
-          />
-        </div>
-        <span className="text-xs font-semibold text-base-content/60 hidden sm:block">
-          Total Users: {filteredUsers.length}
-        </span>
-      </div> */}
+      {/* =====================================================
+          LOADING
+      ===================================================== */}
 
-      {/* Error Message */}
-      {/* {errorMessage && (
-        <div className="flex items-center gap-2 rounded-xl bg-error/10 border border-error/20 p-3.5 text-xs text-error">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{errorMessage}</span>
+      {loading && (
+        <div className="flex justify-center py-10">
+          <span className="loading loading-spinner loading-lg"></span>
         </div>
       )}
 
-      {/* Table Container */}
-      {/* <div className="overflow-hidden rounded-2xl border border-base-content/10 bg-base-100/80 backdrop-blur-xl shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="table table-md w-full">
+      {/* =====================================================
+          ERROR
+      ===================================================== */}
+
+      {error && (
+        <div className="alert alert-error mb-6">
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* =====================================================
+          NO ORDERS
+      ===================================================== */}
+
+      {!loading && !error && orders.length === 0 && (
+        <div className="text-center py-10">
+          <p className="text-gray-500">No orders found.</p>
+        </div>
+      )}
+
+      {/* =====================================================
+          ORDERS TABLE
+      ===================================================== */}
+
+      {!loading && orders.length > 0 && (
+        <div className="overflow-x-auto bg-base-100 rounded-xl shadow">
+          <table className="table">
             <thead>
-              <tr className="border-b border-base-content/10 text-xs text-base-content/50 bg-base-200/30">
-                <th>User Detail</th>
-                <th>Role</th>
-                <th>Build Limit</th>
-                <th>Actions</th>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Action</th>
               </tr>
             </thead>
-            <tbody className="text-xs divide-y divide-base-content/5">
-              {loading ? (
-                <tr>
-                  <td colSpan="4" className="text-center py-8">
-                    <span className="loading loading-spinner loading-md text-primary" />
-                  </td>
-                </tr>
-              ) : filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan="4" className="text-center py-8 text-base-content/50">
-                    No matching users found.
-                  </td>
-                </tr>
-              ) : (
-                filteredUsers.map((userItem) => (
-                  <tr key={userItem._id || userItem.firebase_id} className="hover:bg-base-200/40 transition-colors">
-                    <td>
-                      <div className="flex items-center gap-3">
-                        <div className="avatar">
-                          <div className="w-9 h-9 rounded-xl ring-1 ring-base-content/10">
-                            <img
-                              src={userItem.photoURL || "https://i.ibb.co/mR4q4Yq/user-placeholder.png"}
-                              alt={userItem.name}
-                            />
-                          </div>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-base-content">
-                            {userItem.name || "N/A"}
-                          </span>
-                          <span className="text-[11px] text-base-content/50">
-                            {userItem.email}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                          userItem.role === "admin"
-                            ? "bg-primary/10 text-primary border border-primary/20"
-                            : "bg-base-200 text-base-content/70 border border-base-content/10"
-                        }`}
-                      >
-                        <Shield className="h-3 w-3" />
-                        {userItem.role || "user"}
-                      </span>
-                    </td>
-                    <td className="font-semibold text-base-content/80">
-                      {userItem.build_limit || 100}
-                    </td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleRoleChange(userItem._id, userItem.role)}
-                          className="btn btn-ghost btn-xs rounded-lg text-primary hover:bg-primary/10"
-                          title="Toggle Admin Privilege"
-                        >
-                          <UserCheck className="h-3.5 w-3.5" />
-                          <span>Toggle Role</span>
-                        </button>
 
-                        <button
-                          onClick={() => handleDeleteUser(userItem._id)}
-                          className="btn btn-ghost btn-xs rounded-lg text-error hover:bg-error/10"
-                          title="Delete User"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order.order_id}>
+                  {/* ORDER ID */}
+                  <td>
+                    <span className="font-semibold">#{order.order_id}</span>
+                  </td>
+
+                  {/* CUSTOMER */}
+                  <td>{order.user_name || "Unknown User"}</td>
+
+                  {/* EMAIL */}
+                  <td>{order.user_email || "N/A"}</td>
+
+                  {/* DATE */}
+                  <td>{formatDate(order.created_at)}</td>
+
+                  {/* STATUS */}
+                  <td>
+                    <span
+                      className={`badge ${
+                        order.status === "pending"
+                          ? "badge-warning"
+                          : order.status === "accepted"
+                            ? "badge-info"
+                            : order.status === "onWay"
+                              ? "badge-primary"
+                              : order.status === "complete"
+                                ? "badge-success"
+                                : "badge-ghost"
+                      }`}
+                    >
+                      {order.status}
+                    </span>
+                  </td>
+
+                  {/* TOTAL PRICE */}
+                  <td>৳ {Number(order.total_price || 0).toLocaleString()}</td>
+
+                  {/* VIEW DETAILS */}
+                  <td>
+                    <button
+                      onClick={() =>
+                        navigate(`/admin/manage-orders/${order.order_id}`)
+                      }
+                      className="btn btn-sm btn-primary"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
-      </div> */} 
+      )}
 
-      <p className="text-9xl font-bold text-center mt-50">Comming soon!!! In progress!!!</p>
+      {/* =====================================================
+          ORDER DETAILS MODAL
+      ===================================================== */}
+
+      {selectedOrder && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-4xl">
+            {/* HEADER */}
+
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">
+                  Order #{selectedOrder.order_id}
+                </h2>
+
+                <p className="text-gray-500">
+                  {formatDate(selectedOrder.created_at)}
+                </p>
+              </div>
+
+              <button
+                onClick={closeDetails}
+                className="btn btn-sm btn-circle btn-ghost"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* CUSTOMER INFORMATION */}
+
+            <div className="bg-base-200 rounded-lg p-4 mb-6">
+              <h3 className="font-bold text-lg mb-2">Customer Information</h3>
+
+              <p>
+                <span className="font-semibold">Name:</span>{" "}
+                {selectedOrder.user_name || "N/A"}
+              </p>
+
+              <p>
+                <span className="font-semibold">Email:</span>{" "}
+                {selectedOrder.user_email || "N/A"}
+              </p>
+
+              <p>
+                <span className="font-semibold">Firebase ID:</span>{" "}
+                {selectedOrder.firebase_id || "N/A"}
+              </p>
+            </div>
+
+            {/* ORDER STATUS */}
+
+            <div className="mb-6">
+              <h3 className="font-bold text-lg mb-2">Order Status</h3>
+
+              <span
+                className={`badge badge-lg ${
+                  selectedOrder.status === "pending"
+                    ? "badge-warning"
+                    : selectedOrder.status === "accepted"
+                      ? "badge-info"
+                      : selectedOrder.status === "onWay"
+                        ? "badge-primary"
+                        : selectedOrder.status === "complete"
+                          ? "badge-success"
+                          : "badge-ghost"
+                }`}
+              >
+                {selectedOrder.status}
+              </span>
+            </div>
+
+            {/* PRODUCTS */}
+
+            <div>
+              <h3 className="font-bold text-lg mb-3">Products</h3>
+
+              <div className="overflow-x-auto">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Price</th>
+                      <th>Quantity</th>
+                      <th>Subtotal</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {selectedOrder.products?.map((product) => (
+                      <tr key={product.product_id}>
+                        <td>
+                          <div className="flex items-center gap-3">
+                            {product.product_images && (
+                              <img
+                                src={product.product_images}
+                                alt={product.product_name}
+                                className="w-12 h-12 object-contain rounded"
+                              />
+                            )}
+
+                            <span>{product.product_name}</span>
+                          </div>
+                        </td>
+
+                        <td>
+                          ৳{" "}
+                          {Number(product.product_price || 0).toLocaleString()}
+                        </td>
+
+                        <td>{product.quantity}</td>
+
+                        <td>
+                          ৳{" "}
+                          {(
+                            Number(product.product_price || 0) *
+                            Number(product.quantity || 0)
+                          ).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* TOTAL */}
+
+            <div className="flex justify-end mt-6">
+              <div className="text-xl font-bold">
+                Total: ৳{" "}
+                {Number(selectedOrder.total_price || 0).toLocaleString()}
+              </div>
+            </div>
+
+            {/* CLOSE */}
+
+            <div className="modal-action">
+              <button onClick={closeDetails} className="btn">
+                Close
+              </button>
+            </div>
+          </div>
+
+          {/* MODAL BACKDROP */}
+
+          <div className="modal-backdrop" onClick={closeDetails}></div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Manageuser;
+export default ManageUser;
