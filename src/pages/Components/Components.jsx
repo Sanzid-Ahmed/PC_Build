@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import useProducts from "../../hooks/useProducts";
+
 import FilterSidebar from "./FilterSidebar/FilterSidebar";
 import SortBar from "./SortBar/SortBar";
 import ActiveFilters from "./ActiveFilters/ActiveFilters";
@@ -34,11 +35,40 @@ const Components = () => {
   ===================================================== */
 
   const preparedProducts = useMemo(() => {
-    return products.map((product) => ({
+    const prepared = products.map((product) => ({
       ...product,
       numericPrice: Number(product.price) || 0,
       searchableName: String(product.name || "").toLowerCase(),
+      searchableStore: String(product.store || "").toLowerCase(),
     }));
+
+    /*
+      Star Tech products come first.
+
+      This only affects the default order.
+      Price/name sorting below will still work normally.
+    */
+    prepared.sort((a, b) => {
+      const aIsStarTech =
+        a.searchableStore.includes("star tech") ||
+        a.searchableStore.includes("startech");
+
+      const bIsStarTech =
+        b.searchableStore.includes("star tech") ||
+        b.searchableStore.includes("startech");
+
+      if (aIsStarTech && !bIsStarTech) {
+        return -1;
+      }
+
+      if (!aIsStarTech && bIsStarTech) {
+        return 1;
+      }
+
+      return 0;
+    });
+
+    return prepared;
   }, [products]);
 
   /* =====================================================
@@ -172,6 +202,31 @@ const Components = () => {
       result.push(product);
     }
 
+    /*
+      Keep Star Tech first when default sorting is selected.
+    */
+    if (sortOption === "default") {
+      result.sort((a, b) => {
+        const aIsStarTech =
+          a.searchableStore.includes("star tech") ||
+          a.searchableStore.includes("startech");
+
+        const bIsStarTech =
+          b.searchableStore.includes("star tech") ||
+          b.searchableStore.includes("startech");
+
+        if (aIsStarTech && !bIsStarTech) {
+          return -1;
+        }
+
+        if (!aIsStarTech && bIsStarTech) {
+          return 1;
+        }
+
+        return 0;
+      });
+    }
+
     if (sortOption === "price-low") {
       result.sort(
         (a, b) => a.numericPrice - b.numericPrice
@@ -293,10 +348,8 @@ const Components = () => {
     setSelectedCategory("All");
     setSelectedStore("All");
     setSortOption("default");
-
     setMinPrice(priceRange.min);
     setMaxPrice(priceRange.max);
-
     setCurrentPage(1);
   };
 
@@ -346,7 +399,6 @@ const Components = () => {
         w-full
         overflow-x-hidden
         bg-base-100
-
         px-[clamp(0.75rem,2vw,2.5rem)]
         pt-[clamp(5.5rem,8vw,8rem)]
         pb-[clamp(3rem,5vw,5rem)]
@@ -413,9 +465,7 @@ const Components = () => {
             grid
             min-w-0
             grid-cols-1
-
             gap-[clamp(1rem,1.5vw,2rem)]
-
             lg:grid-cols-[clamp(190px,18vw,270px)_minmax(0,1fr)]
           "
         >
@@ -475,26 +525,22 @@ const Components = () => {
 
             {/* =================================================
                 PRODUCT GRID
-
-                MOBILE  = 1
-                SM      = 2
-                LG      = 3
-                XL      = 4
+                MOBILE = 1
+                SM     = 2
+                LG     = 3
+                XL     = 4
             ================================================= */}
 
             {paginatedProducts.length > 0 ? (
               <div
                 className="
                   mt-[clamp(0.75rem,1.5vw,1.25rem)]
-
                   grid
                   min-w-0
-
                   grid-cols-1
                   sm:grid-cols-2
                   lg:grid-cols-3
                   xl:grid-cols-4
-
                   gap-[clamp(0.65rem,1vw,1.5rem)]
                 "
               >

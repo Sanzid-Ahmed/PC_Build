@@ -1,7 +1,5 @@
 import React, { useMemo, useState } from "react";
-
 import { useNavigate } from "react-router";
-
 import {
   FaMicrochip,
   FaShoppingCart,
@@ -9,18 +7,12 @@ import {
   FaStore,
   FaExternalLinkAlt,
 } from "react-icons/fa";
-
 import { useCart } from "../../../hooks/useCart";
 
 const ProductCard = ({ product }) => {
   const [imageError, setImageError] = useState(false);
-
   const { addToCart } = useCart();
   const navigate = useNavigate();
-
-  /* =====================================================
-     PARSE IMAGES
-  ===================================================== */
 
   const image = useMemo(() => {
     let images = product?.images;
@@ -40,30 +32,15 @@ const ProductCard = ({ product }) => {
     return null;
   }, [product?.images]);
 
-  /* =====================================================
-     PRICE
-  ===================================================== */
-
-  const price = Number(
-    product?.numericPrice ?? product?.price ?? 0
-  );
-
-  /* =====================================================
-     BOTTLENECK
-  ===================================================== */
+  const price = Number(product?.numericPrice ?? product?.price ?? 0);
 
   const getBottleneckPercentage = (category = "") => {
     const value = category.toLowerCase();
 
-    // Processor / CPU
-    if (
-      value.includes("processor") ||
-      value.includes("cpu")
-    ) {
+    if (value.includes("processor") || value.includes("cpu")) {
       return 2.5;
     }
 
-    // Graphics Card / GPU
     if (
       value.includes("graphics") ||
       value.includes("gpu") ||
@@ -72,7 +49,6 @@ const ProductCard = ({ product }) => {
       return 2;
     }
 
-    // Motherboard / RAM / PSU
     if (
       value.includes("motherboard") ||
       value.includes("ram") ||
@@ -83,7 +59,6 @@ const ProductCard = ({ product }) => {
       return 1;
     }
 
-    // SSD / HDD / Cooler
     if (
       value.includes("ssd") ||
       value.includes("hdd") ||
@@ -94,7 +69,6 @@ const ProductCard = ({ product }) => {
       return 0.75;
     }
 
-    // Casing / Monitor / Keyboard / Mouse
     if (
       value.includes("casing") ||
       value.includes("case") ||
@@ -108,18 +82,12 @@ const ProductCard = ({ product }) => {
     return 0;
   };
 
-  const bottleneckPercentage =
-    getBottleneckPercentage(product?.category || "");
+  const bottleneckPercentage = getBottleneckPercentage(
+    product?.category || ""
+  );
 
-  const bottleneckAmount =
-    price * (bottleneckPercentage / 100);
-
-  const totalPrice =
-    price + bottleneckAmount;
-
-  /* =====================================================
-     OLD PRICE
-  ===================================================== */
+  const bottleneckAmount = price * (bottleneckPercentage / 100);
+  const totalPrice = price + bottleneckAmount;
 
   const oldPrice =
     product?.old_price !== null &&
@@ -128,53 +96,27 @@ const ProductCard = ({ product }) => {
       ? Number(product.old_price)
       : null;
 
-  /* =====================================================
-     DISCOUNT
-  ===================================================== */
-
   const hasDiscount =
-    oldPrice !== null &&
-    oldPrice > 0 &&
-    oldPrice > price;
+    oldPrice !== null && oldPrice > 0 && oldPrice > price;
 
   const discount = hasDiscount
-    ? Math.round(
-        ((oldPrice - price) / oldPrice) * 100
-      )
+    ? Math.round(((oldPrice - price) / oldPrice) * 100)
     : 0;
-
-  /* =====================================================
-     ADD TO CART
-  ===================================================== */
 
   const handleAddToCart = () => {
     addToCart({
       ...product,
-
-      // Original product price
       mainPrice: price,
       originalPrice: price,
-
-      // Bottleneck information
       bottleneck_percentage: bottleneckPercentage,
       bottleneck_amount: bottleneckAmount,
-
-      // Final price including bottleneck adjustment
-      totalPrice: totalPrice,
+      totalPrice,
     });
   };
-
-  /* =====================================================
-     VIEW DETAILS
-  ===================================================== */
 
   const handleViewDetails = () => {
     navigate(`/product/${product.id}`);
   };
-
-  /* =====================================================
-     RENDER
-  ===================================================== */
 
   return (
     <article
@@ -186,7 +128,7 @@ const ProductCard = ({ product }) => {
         w-full
         flex-col
         overflow-hidden
-        rounded-[clamp(0.75rem,1vw,1.25rem)]
+        rounded-[clamp(0.5rem,0.8vw,1rem)]
         border
         border-base-300
         bg-base-100
@@ -198,10 +140,7 @@ const ProductCard = ({ product }) => {
         hover:shadow-lg
       "
     >
-      {/* =================================================
-          IMAGE
-      ================================================= */}
-
+      {/* IMAGE */}
       <div
         className="
           relative
@@ -212,27 +151,25 @@ const ProductCard = ({ product }) => {
           justify-center
           overflow-hidden
           bg-base-200
-          h-[clamp(10rem,14vw,13rem)]
-          p-[clamp(0.6rem,1vw,1.25rem)]
+          aspect-[4/3]
+          p-[clamp(0.35rem,0.8vw,1rem)]
         "
       >
-        {/* =================================================
-            DISCOUNT BADGE
-        ================================================= */}
-
+        {/* DISCOUNT */}
         {hasDiscount && (
           <div
             className="
               absolute
-              left-[clamp(0.5rem,0.8vw,0.75rem)]
-              top-[clamp(0.5rem,0.8vw,0.75rem)]
+              left-[clamp(0.3rem,0.6vw,0.7rem)]
+              top-[clamp(0.3rem,0.6vw,0.7rem)]
               z-10
               rounded-full
               bg-primary
-              px-[clamp(0.4rem,0.6vw,0.7rem)]
-              py-[clamp(0.2rem,0.35vw,0.3rem)]
-              text-[clamp(0.5rem,0.65vw,0.7rem)]
+              px-[clamp(0.3rem,0.5vw,0.65rem)]
+              py-[clamp(0.15rem,0.3vw,0.3rem)]
+              text-[clamp(0.45rem,0.6vw,0.7rem)]
               font-bold
+              leading-none
               text-primary-content
               shadow-sm
             "
@@ -241,28 +178,26 @@ const ProductCard = ({ product }) => {
           </div>
         )}
 
-        {/* =================================================
-            CATEGORY BADGE
-        ================================================= */}
-
+        {/* CATEGORY */}
         {product?.category && (
           <div
             title={product.category}
             className="
               absolute
-              right-[clamp(0.5rem,0.8vw,0.75rem)]
-              top-[clamp(0.5rem,0.8vw,0.75rem)]
+              right-[clamp(0.3rem,0.6vw,0.7rem)]
+              top-[clamp(0.3rem,0.6vw,0.7rem)]
               z-10
-              max-w-[55%]
+              max-w-[50%]
               truncate
               rounded-full
               border
               border-base-300
               bg-base-100
-              px-[clamp(0.4rem,0.6vw,0.7rem)]
-              py-[clamp(0.2rem,0.35vw,0.3rem)]
-              text-[clamp(0.5rem,0.65vw,0.7rem)]
+              px-[clamp(0.3rem,0.5vw,0.65rem)]
+              py-[clamp(0.15rem,0.3vw,0.3rem)]
+              text-[clamp(0.45rem,0.6vw,0.7rem)]
               font-semibold
+              leading-none
               text-primary
               shadow-sm
             "
@@ -271,10 +206,7 @@ const ProductCard = ({ product }) => {
           </div>
         )}
 
-        {/* =================================================
-            PRODUCT IMAGE
-        ================================================= */}
-
+        {/* PRODUCT IMAGE */}
         {image && !imageError ? (
           <img
             src={image}
@@ -285,7 +217,6 @@ const ProductCard = ({ product }) => {
             className="
               h-full
               w-full
-              max-w-full
               object-contain
               transition-transform
               duration-500
@@ -296,50 +227,41 @@ const ProductCard = ({ product }) => {
           <div
             className="
               flex
-              h-[clamp(4rem,6vw,6rem)]
-              w-[clamp(4rem,6vw,6rem)]
+              h-[clamp(3rem,6vw,6rem)]
+              w-[clamp(3rem,6vw,6rem)]
               items-center
               justify-center
-              rounded-[clamp(0.75rem,1vw,1rem)]
+              rounded-[clamp(0.5rem,0.8vw,1rem)]
               bg-base-100
               text-primary
               shadow-sm
             "
           >
-            <FaMicrochip
-              className="
-                text-[clamp(2rem,3vw,3rem)]
-              "
-            />
+            <FaMicrochip className="text-[clamp(1.5rem,3vw,3rem)]" />
           </div>
         )}
       </div>
 
-      {/* =====================================================
-          INFORMATION
-      ===================================================== */}
-
+      {/* INFORMATION */}
       <div
         className="
           flex
           min-w-0
           flex-1
           flex-col
-          p-[clamp(0.7rem,1vw,1.15rem)]
+          p-[clamp(0.45rem,0.8vw,1rem)]
         "
       >
-        {/* =================================================
-            STORE
-        ================================================= */}
-
+        {/* STORE */}
         <div
           className="
             flex
             min-w-0
             items-center
-            gap-[clamp(0.3rem,0.5vw,0.5rem)]
-            text-[clamp(0.58rem,0.7vw,0.75rem)]
+            gap-[clamp(0.2rem,0.4vw,0.45rem)]
+            text-[clamp(0.45rem,0.6vw,0.75rem)]
             font-semibold
+            leading-tight
             text-primary
           "
         >
@@ -347,45 +269,40 @@ const ProductCard = ({ product }) => {
 
           <span
             title={product?.store || "Unknown Store"}
-            className="
-              min-w-0
-              truncate
-            "
+            className="min-w-0 truncate"
           >
             {product?.store || "Unknown Store"}
           </span>
         </div>
 
-        {/* =================================================
-            PRODUCT NAME
-        ================================================= */}
-
+        {/* PRODUCT NAME */}
         <h3
           title={product?.name || ""}
           className="
-            mt-[clamp(0.35rem,0.6vw,0.65rem)]
-            min-h-[clamp(2.35rem,3vw,3rem)]
-            line-clamp-2
+            mt-[clamp(0.25rem,0.5vw,0.6rem)]
+            min-h-[clamp(2.5rem,4vw,4rem)]
+            overflow-hidden
             break-words
-            text-[clamp(0.75rem,0.9vw,1rem)]
+            text-[clamp(0.65rem,0.85vw,1rem)]
             font-bold
-            leading-[1.4]
+            leading-[1.35]
             text-base-content
+            [display:-webkit-box]
+            [-webkit-box-orient:vertical]
+            [-webkit-line-clamp:3]
           "
         >
           {product?.name || "Unnamed Product"}
         </h3>
 
-        {/* =================================================
-            BRAND
-        ================================================= */}
-
+        {/* BRAND */}
         {product?.brand && (
           <p
             className="
-              mt-[clamp(0.35rem,0.6vw,0.6rem)]
+              mt-[clamp(0.2rem,0.45vw,0.55rem)]
               truncate
-              text-[clamp(0.58rem,0.7vw,0.75rem)]
+              text-[clamp(0.45rem,0.6vw,0.75rem)]
+              leading-tight
               text-base-content/60
             "
           >
@@ -396,43 +313,31 @@ const ProductCard = ({ product }) => {
           </p>
         )}
 
-        {/* =================================================
-            RATING
-        ================================================= */}
-
+        {/* RATING */}
         {product?.rating !== null &&
           product?.rating !== undefined &&
           product?.rating !== "" && (
             <div
               className="
-                mt-[clamp(0.45rem,0.7vw,0.7rem)]
+                mt-[clamp(0.3rem,0.55vw,0.7rem)]
                 flex
                 min-w-0
                 items-center
-                gap-[clamp(0.2rem,0.4vw,0.4rem)]
-                text-[clamp(0.65rem,0.8vw,0.85rem)]
+                gap-[clamp(0.15rem,0.3vw,0.4rem)]
+                text-[clamp(0.5rem,0.7vw,0.85rem)]
+                leading-none
               "
             >
-              <FaStar
-                className="
-                  shrink-0
-                  text-warning
-                "
-              />
+              <FaStar className="shrink-0 text-warning" />
 
-              <span
-                className="
-                  font-semibold
-                  text-base-content
-                "
-              >
+              <span className="font-semibold text-base-content">
                 {product.rating}
               </span>
 
               <span
                 className="
                   truncate
-                  text-[clamp(0.55rem,0.65vw,0.7rem)]
+                  text-[clamp(0.45rem,0.55vw,0.7rem)]
                   text-base-content/50
                 "
               >
@@ -441,73 +346,28 @@ const ProductCard = ({ product }) => {
             </div>
           )}
 
-        {/* =================================================
-            BOTTLENECK
-        ================================================= */}
-
-        {/* <div
-          className="
-            mt-[clamp(0.5rem,0.8vw,0.75rem)]
-            flex
-            items-center
-            justify-between
-            rounded-lg
-            border
-            border-primary/10
-            bg-primary/5
-            px-3
-            py-2
-          "
-        >
-          <span
-            className="
-              text-[clamp(0.58rem,0.7vw,0.75rem)]
-              font-semibold
-              text-base-content/60
-            "
-          >
-            Bottleneck
-          </span>
-
-          <span
-            className="
-              text-[clamp(0.65rem,0.8vw,0.85rem)]
-              font-bold
-              text-primary
-            "
-          >
-            {bottleneckPercentage}%
-          </span>
-        </div> */}
-
-        {/* =================================================
-            PRICE + BUTTONS
-        ================================================= */}
-
+        {/* PRICE + BUTTONS */}
         <div
           className="
             mt-auto
-            pt-[clamp(0.75rem,1.2vw,1.25rem)]
+            pt-[clamp(0.5rem,0.9vw,1rem)]
           "
         >
-          {/* =================================================
-              PRICE
-          ================================================= */}
-
+          {/* PRICE */}
           <div
             className="
               flex
               min-w-0
               flex-wrap
               items-end
-              gap-x-[clamp(0.35rem,0.7vw,0.7rem)]
+              gap-x-[clamp(0.2rem,0.5vw,0.7rem)]
               gap-y-1
             "
           >
             <span
               className="
                 min-w-0
-                text-[clamp(1rem,1.5vw,1.4rem)]
+                text-[clamp(0.8rem,1.35vw,1.4rem)]
                 font-extrabold
                 leading-none
                 text-primary
@@ -520,7 +380,8 @@ const ProductCard = ({ product }) => {
               <span
                 className="
                   mb-0.5
-                  text-[clamp(0.6rem,0.75vw,0.8rem)]
+                  text-[clamp(0.45rem,0.65vw,0.8rem)]
+                  leading-none
                   text-base-content/50
                   line-through
                 "
@@ -530,14 +391,13 @@ const ProductCard = ({ product }) => {
             )}
           </div>
 
-          {/* =================================================
-              BOTTLENECK AMOUNT
-          ================================================= */}
-
+          {/* BOTTLENECK AMOUNT */}
           <div
             className="
               mt-1
-              text-[clamp(0.55rem,0.65vw,0.7rem)]
+              truncate
+              text-[clamp(0.4rem,0.55vw,0.7rem)]
+              leading-tight
               text-base-content/50
             "
           >
@@ -548,15 +408,14 @@ const ProductCard = ({ product }) => {
             bottleneck adjustment
           </div>
 
-          {/* =================================================
-              TOTAL PRICE
-          ================================================= */}
-
+          {/* TOTAL PRICE */}
           <div
             className="
               mt-1
-              text-[clamp(0.6rem,0.7vw,0.75rem)]
+              truncate
+              text-[clamp(0.45rem,0.6vw,0.75rem)]
               font-semibold
+              leading-tight
               text-base-content/70
             "
           >
@@ -566,23 +425,17 @@ const ProductCard = ({ product }) => {
             })}
           </div>
 
-          {/* =================================================
-              BUTTONS
-          ================================================= */}
-
+          {/* BUTTONS */}
           <div
             className="
-              mt-[clamp(0.6rem,0.9vw,1rem)]
+              mt-[clamp(0.4rem,0.7vw,0.9rem)]
               flex
               min-w-0
               w-full
-              gap-[clamp(0.35rem,0.6vw,0.6rem)]
+              gap-[clamp(0.2rem,0.5vw,0.6rem)]
             "
           >
-            {/* =================================================
-                VIEW DETAILS
-            ================================================= */}
-
+            {/* VIEW DETAILS */}
             <button
               type="button"
               onClick={handleViewDetails}
@@ -592,13 +445,14 @@ const ProductCard = ({ product }) => {
                 flex-1
                 items-center
                 justify-center
-                gap-[clamp(0.25rem,0.4vw,0.45rem)]
-                rounded-xl
+                gap-[clamp(0.15rem,0.3vw,0.45rem)]
+                rounded-[clamp(0.5rem,0.7vw,0.75rem)]
                 bg-primary
-                px-[clamp(0.4rem,0.7vw,0.8rem)]
-                py-[clamp(0.6rem,0.8vw,0.75rem)]
-                text-[clamp(0.6rem,0.75vw,0.82rem)]
+                px-[clamp(0.25rem,0.6vw,0.8rem)]
+                py-[clamp(0.4rem,0.7vw,0.75rem)]
+                text-[clamp(0.45rem,0.65vw,0.82rem)]
                 font-bold
+                leading-none
                 whitespace-nowrap
                 text-primary-content
                 transition-all
@@ -608,22 +462,19 @@ const ProductCard = ({ product }) => {
                 active:scale-[0.98]
               "
             >
-              <span className="whitespace-nowrap">
+              <span className="truncate">
                 View Details
               </span>
 
               <FaExternalLinkAlt
                 className="
                   shrink-0
-                  text-[clamp(0.5rem,0.65vw,0.7rem)]
+                  text-[clamp(0.4rem,0.55vw,0.7rem)]
                 "
               />
             </button>
 
-            {/* =================================================
-                ADD TO CART
-            ================================================= */}
-
+            {/* ADD TO CART */}
             <button
               type="button"
               title="Add to cart"
@@ -631,12 +482,12 @@ const ProductCard = ({ product }) => {
               onClick={handleAddToCart}
               className="
                 flex
-                h-[clamp(2.5rem,3.2vw,3rem)]
-                w-[clamp(2.5rem,3.2vw,3rem)]
+                h-[clamp(2rem,3vw,3rem)]
+                w-[clamp(2rem,3vw,3rem)]
                 shrink-0
                 items-center
                 justify-center
-                rounded-xl
+                rounded-[clamp(0.5rem,0.7vw,0.75rem)]
                 border
                 border-primary
                 bg-base-100
@@ -650,9 +501,7 @@ const ProductCard = ({ product }) => {
               "
             >
               <FaShoppingCart
-                className="
-                  text-[clamp(0.75rem,1vw,1rem)]
-                "
+                className="text-[clamp(0.6rem,0.9vw,1rem)]"
               />
             </button>
           </div>
