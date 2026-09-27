@@ -46,6 +46,10 @@ const Navbar = () => {
       name: "My Orders",
       path: "/my-orders",
     },
+    {
+      name: "Custom Build",
+      path: "/custom-build",
+    },
   ];
 
   // =========================

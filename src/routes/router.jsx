@@ -18,6 +18,7 @@ import Manageuser from "../pages/Admin/Manageuser/Manageuser";
 import AdminAuthLayout from "../layouts/AdminAuthLayout";
 import OrderDetails from "../pages/Admin/OrderDetails/OrderDetails";
 import MyOrders from "../pages/MyOrders/MyOrders";
+import CustomBuildPage from "../pages/CustomBuild/CustomBuildPage";
 
 export const router = createBrowserRouter([
   {
@@ -55,10 +56,15 @@ export const router = createBrowserRouter([
       },
       {
         path: "my-orders",
-        element: 
-         <PrivateRoute>
-          <MyOrders />
-         </PrivateRoute>
+        element: (
+          <PrivateRoute>
+            <MyOrders />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "custom-build",
+        element: <CustomBuildPage />,
       },
     ],
   },
