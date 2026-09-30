@@ -74,7 +74,9 @@ const AdminRegister = () => {
         build_limit: 1000,
       };
 
-      navigate("/admin/login")
+      navigate("/admin", {
+      replace: true,
+    });
 
       try {
         await api.post("/api/users/sync", backendData, {

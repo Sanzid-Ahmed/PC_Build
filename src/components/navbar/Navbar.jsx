@@ -39,16 +39,16 @@ const Navbar = () => {
       path: "/build-pc",
     },
     {
-      name: "About Us",
-      path: "/about-us",
+      name: "Custom Build",
+      path: "/custom-build",
     },
     {
       name: "My Orders",
       path: "/my-orders",
     },
     {
-      name: "Custom Build",
-      path: "/custom-build",
+      name: "About Us",
+      path: "/about-us",
     },
   ];
 

@@ -36,8 +36,14 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
     //   path: "/admin/users",
     //   icon: Users,
     // },
+    // {
+    //   name: "Manage Users",
+    //   path: "/admin",
+    //   icon: Users,
+    //   end: true,
+    // },
     {
-      name: "Manage Users",
+      name: "Manage Orders",
       path: "/admin",
       icon: Users,
       end: true,
