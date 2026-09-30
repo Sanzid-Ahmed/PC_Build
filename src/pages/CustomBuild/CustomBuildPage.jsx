@@ -7,7 +7,6 @@ import React, {
 import { useLocation } from "react-router";
 
 import {
-  FaBolt,
   FaCheckCircle,
   FaChevronRight,
   FaCogs,
@@ -24,7 +23,6 @@ import {
 
 import ComponentSelector from "./ComponentSelector/ComponentSelector";
 import BuildPreview from "./BuildPreview/BuildPreview";
-import AISuggestionBar from "./AISuggestionBar/AISuggestionBar";
 import BuildSummary from "./BuildSummary/BuildSummary";
 
 import {
@@ -96,7 +94,7 @@ const COMPONENTS = [
     id: "psu",
     name: "Power Supply",
     shortName: "PSU",
-    icon: FaBolt,
+    icon: FaMicrochip,
     required: true,
   },
   {
@@ -366,7 +364,7 @@ const CustomBuildPage = () => {
   // ==========================================================
 
   return (
-    <div className="min-h-screen min-w-0 overflow-x-hidden bg-base-200 mt-20">
+    <div className="min-h-screen min-w-0 overflow-x-hidden bg-base-200 pt-20">
 
       {/* ======================================================
           PAGE HEADER
@@ -374,30 +372,40 @@ const CustomBuildPage = () => {
 
       <header className="border-b border-base-300 bg-base-100">
 
-        <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full px-4 py-6 sm:px-6 lg:px-8">
 
-          {/* ==================================================
-              TOP HEADER
-          ================================================== */}
+          {/* HEADER TOP */}
 
-          <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-w-0 flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
             {/* TITLE */}
 
-            <div className="flex min-w-0 items-center gap-3">
+            <div className="flex min-w-0 items-center gap-4">
 
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <FaCogs className="text-lg" />
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/10">
+                <FaCogs className="text-xl" />
               </div>
 
               <div className="min-w-0">
 
-                <h1 className="truncate text-xl font-bold sm:text-2xl lg:text-3xl">
-                  Custom PC Builder
-                </h1>
+                <div className="flex flex-wrap items-center gap-2">
 
-                <p className="mt-0.5 text-xs text-base-content/55 sm:text-sm">
-                  Configure your PC component by component.
+                  <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
+                    Custom PC Builder
+                  </h1>
+
+                  {isBuildComplete && (
+                    <span className="badge badge-success badge-sm gap-1">
+                      <FaCheckCircle />
+                      Complete
+                    </span>
+                  )}
+
+                </div>
+
+                <p className="mt-1 text-xs text-base-content/55 sm:text-sm">
+                  Build your PC component by component
+                  and check compatibility as you go.
                 </p>
 
               </div>
@@ -408,12 +416,12 @@ const CustomBuildPage = () => {
 
             <div className="flex items-center gap-2">
 
-              {/* PROGRESS */}
+              {/* PROGRESS CARD */}
 
               <div
                 className={`
-                  flex min-w-0 items-center gap-2 rounded-xl
-                  border px-3 py-2
+                  flex items-center gap-3 rounded-xl
+                  border px-3.5 py-2.5
                   ${
                     isBuildComplete
                       ? "border-success/25 bg-success/5"
@@ -423,12 +431,12 @@ const CustomBuildPage = () => {
               >
 
                 {isBuildComplete ? (
-                  <FaCheckCircle className="shrink-0 text-success" />
+                  <FaCheckCircle className="text-success" />
                 ) : (
-                  <div className="relative flex h-5 w-5 shrink-0 items-center justify-center">
+                  <div className="relative flex h-6 w-6 shrink-0 items-center justify-center">
 
                     <svg
-                      className="h-5 w-5 -rotate-90"
+                      className="h-6 w-6 -rotate-90"
                       viewBox="0 0 36 36"
                     >
 
@@ -463,13 +471,13 @@ const CustomBuildPage = () => {
                   </div>
                 )}
 
-                <div className="min-w-0">
+                <div>
 
-                  <p className="text-[10px] uppercase tracking-wide text-base-content/45">
-                    Progress
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-base-content/45">
+                    Build Progress
                   </p>
 
-                  <p className="text-xs font-bold">
+                  <p className="text-sm font-bold">
                     {requiredSelectedCount}/
                     {REQUIRED_COMPONENTS.length}
                   </p>
@@ -504,19 +512,29 @@ const CustomBuildPage = () => {
 
           </div>
 
-          {/* PROGRESS BAR */}
+          {/* PROGRESS */}
 
-          <div className="mt-5">
+          <div className="mt-6">
 
             <div className="mb-2 flex items-center justify-between">
 
-              <span className="text-[11px] font-medium text-base-content/50">
-                {isBuildComplete
-                  ? "Core configuration complete"
-                  : "Required component progress"}
-              </span>
+              <div className="flex items-center gap-2">
 
-              <span className="text-[11px] font-bold">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-base-content/45">
+                  {isBuildComplete
+                    ? "Configuration complete"
+                    : "Configuration progress"}
+                </span>
+
+                {selectedCount > 0 && (
+                  <span className="text-[11px] text-base-content/35">
+                    • {selectedCount} selected
+                  </span>
+                )}
+
+              </div>
+
+              <span className="text-xs font-bold">
                 {progressPercentage}%
               </span>
 
@@ -524,7 +542,7 @@ const CustomBuildPage = () => {
 
             <progress
               className={`
-                progress w-full
+                progress h-2 w-full
                 ${
                   isBuildComplete
                     ? "progress-success"
@@ -545,27 +563,30 @@ const CustomBuildPage = () => {
           MAIN CONTENT
       ====================================================== */}
 
-      <main className="mx-auto w-full max-w-7xl min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+      <main className="mx-auto w-full min-w-0 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 
-        {/* AUTO SAVE STATUS */}
+        {/* ====================================================
+            AUTO SAVE STATUS
+        ==================================================== */}
 
         {selectedCount > 0 && (
-          <div className="mb-5">
+          <div className="mb-6">
 
-            <div className="flex min-w-0 items-center gap-3 rounded-xl border border-info/20 bg-info/5 px-3.5 py-3">
+            <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-info/20 bg-info/5 px-4 py-3.5">
 
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-info/10 text-info">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-info/10 text-info">
                 <FaCheckCircle className="text-sm" />
               </div>
 
               <div className="min-w-0">
 
                 <p className="text-xs font-semibold sm:text-sm">
-                  Build progress saved
+                  Your build is automatically saved
                 </p>
 
                 <p className="mt-0.5 text-[10px] leading-4 text-base-content/50 sm:text-xs">
-                  Leave this page anytime. Your current selections will remain when you return.
+                  Your current component selections will
+                  remain available when you return.
                 </p>
 
               </div>
@@ -575,47 +596,47 @@ const CustomBuildPage = () => {
           </div>
         )}
 
-        {/* AI ASSISTANT */}
-
-        <section className="mb-5 min-w-0">
-
-          <AISuggestionBar
-            selectedComponents={
-              selectedComponents
-            }
-            onSelectComponent={
-              selectProduct
-            }
-          />
-
-        </section>
-
-        {/* BUILD STATUS */}
+        {/* ====================================================
+            BUILD STATUS
+        ==================================================== */}
 
         {selectedCount > 0 && (
-          <section className="mb-5 min-w-0">
+          <section className="mb-6 min-w-0">
 
-            {/* COMPLETE + COMPATIBLE */}
+            {/* COMPLETE */}
 
             {isBuildComplete &&
               compatibility.status ===
                 "compatible" && (
 
-                <div className="flex min-w-0 items-start gap-3 rounded-xl border border-success/20 bg-success/5 p-3.5">
+                <div className="rounded-2xl border border-success/20 bg-success/5 p-4 sm:p-5">
 
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success/10 text-success">
-                    <FaCheckCircle />
-                  </div>
+                  <div className="flex min-w-0 items-start gap-4">
 
-                  <div className="min-w-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-success/10 text-success">
+                      <FaCheckCircle />
+                    </div>
 
-                    <h3 className="text-sm font-bold">
-                      Build complete and compatible
-                    </h3>
+                    <div className="min-w-0">
 
-                    <p className="mt-0.5 text-xs leading-5 text-base-content/55">
-                      All required components are selected and the compatibility checks passed.
-                    </p>
+                      <div className="flex flex-wrap items-center gap-2">
+
+                        <h3 className="text-sm font-bold sm:text-base">
+                          Build complete and compatible
+                        </h3>
+
+                        <span className="badge badge-success badge-outline badge-sm">
+                          Ready
+                        </span>
+
+                      </div>
+
+                      <p className="mt-1 text-xs leading-5 text-base-content/55 sm:text-sm">
+                        All required components are selected
+                        and the compatibility checks passed.
+                      </p>
+
+                    </div>
 
                   </div>
 
@@ -628,32 +649,36 @@ const CustomBuildPage = () => {
               compatibility.status ===
                 "compatible" && (
 
-                <div className="flex min-w-0 items-start gap-3 rounded-xl border border-primary/15 bg-primary/5 p-3.5">
+                <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 sm:p-5">
 
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <FaChevronRight />
-                  </div>
+                  <div className="flex min-w-0 items-start gap-4">
 
-                  <div className="min-w-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <FaChevronRight />
+                    </div>
 
-                    <h3 className="text-sm font-bold">
-                      Continue building
-                    </h3>
+                    <div className="min-w-0">
 
-                    <p className="mt-0.5 text-xs leading-5 text-base-content/55">
+                      <h3 className="text-sm font-bold sm:text-base">
+                        Continue building
+                      </h3>
 
-                      {missingComponents.length} required{" "}
+                      <p className="mt-1 text-xs leading-5 text-base-content/55 sm:text-sm">
 
-                      {missingComponents.length === 1
-                        ? "component is"
-                        : "components are"}{" "}
+                        {missingComponents.length} required{" "}
 
-                      still missing.
+                        {missingComponents.length === 1
+                          ? "component is"
+                          : "components are"}{" "}
 
-                      {selectedComponents?.gpu &&
-                        " Your optional GPU is already selected."}
+                        still missing.
 
-                    </p>
+                        {selectedComponents?.gpu &&
+                          " Your optional GPU is already selected."}
+
+                      </p>
+
+                    </div>
 
                   </div>
 
@@ -665,21 +690,26 @@ const CustomBuildPage = () => {
             {compatibility.status ===
               "partially_checked" && (
 
-              <div className="flex min-w-0 items-start gap-3 rounded-xl border border-warning/20 bg-warning/5 p-3.5">
+              <div className="rounded-2xl border border-warning/20 bg-warning/5 p-4 sm:p-5">
 
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-warning/10 text-warning">
-                  <FaExclamationTriangle />
-                </div>
+                <div className="flex min-w-0 items-start gap-4">
 
-                <div className="min-w-0">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/10 text-warning">
+                    <FaExclamationTriangle />
+                  </div>
 
-                  <h3 className="text-sm font-bold">
-                    Compatibility partially checked
-                  </h3>
+                  <div className="min-w-0">
 
-                  <p className="mt-0.5 text-xs leading-5 text-base-content/55">
-                    Some compatibility information is unavailable for the selected products.
-                  </p>
+                    <h3 className="text-sm font-bold sm:text-base">
+                      Compatibility partially checked
+                    </h3>
+
+                    <p className="mt-1 text-xs leading-5 text-base-content/55 sm:text-sm">
+                      Some compatibility information is
+                      unavailable for the selected products.
+                    </p>
+
+                  </div>
 
                 </div>
 
@@ -691,21 +721,21 @@ const CustomBuildPage = () => {
             {compatibility.status ===
               "incompatible" && (
 
-              <div className="min-w-0 rounded-xl border border-error/20 bg-error/5 p-3.5">
+              <div className="rounded-2xl border border-error/20 bg-error/5 p-4 sm:p-5">
 
-                <div className="flex min-w-0 items-start gap-3">
+                <div className="flex min-w-0 items-start gap-4">
 
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-error/10 text-error">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-error/10 text-error">
                     <FaTimes />
                   </div>
 
                   <div className="min-w-0 flex-1">
 
-                    <h3 className="text-sm font-bold">
+                    <h3 className="text-sm font-bold sm:text-base">
                       Compatibility issue detected
                     </h3>
 
-                    <div className="mt-2 space-y-1.5">
+                    <div className="mt-3 space-y-2">
 
                       {incompatibleResults.map(
                         (
@@ -715,7 +745,7 @@ const CustomBuildPage = () => {
 
                           <div
                             key={index}
-                            className="rounded-lg border border-error/10 bg-base-100/60 px-3 py-2"
+                            className="rounded-xl border border-error/10 bg-base-100/60 px-3.5 py-2.5"
                           >
 
                             <p className="break-words text-xs leading-5">
@@ -729,7 +759,6 @@ const CustomBuildPage = () => {
                             </p>
 
                           </div>
-
                         )
                       )}
 
@@ -745,48 +774,102 @@ const CustomBuildPage = () => {
           </section>
         )}
 
-        {/* BUILDER AREA */}
+        {/* ====================================================
+            BUILDER WORKSPACE
+        ==================================================== */}
 
-        <section className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-3">
+        <section className="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm">
 
-          {/* COMPONENT SELECTOR */}
+          {/* WORKSPACE HEADER */}
 
-          <div className="min-w-0 lg:col-span-2">
+          <div className="border-b border-base-300 px-4 py-4 sm:px-5">
 
-            <ComponentSelector
-              selectedComponents={
-                selectedComponents
-              }
-              onSelect={
-                selectProduct
-              }
-            />
+            <div className="flex min-w-0 items-center justify-between gap-3">
+
+              <div className="min-w-0">
+
+                <h2 className="text-sm font-bold sm:text-base">
+                  Choose Your Components
+                </h2>
+
+                <p className="mt-0.5 text-[11px] text-base-content/45 sm:text-xs">
+                  Select compatible components for your custom PC.
+                </p>
+
+              </div>
+
+              <div className="hidden shrink-0 items-center gap-1.5 text-[10px] text-base-content/45 sm:flex">
+
+                <span className="h-2 w-2 rounded-full bg-success" />
+                Selected
+
+                <span className="ml-2 h-2 w-2 rounded-full bg-base-300" />
+                Available
+
+              </div>
+
+            </div>
 
           </div>
 
-          {/* BUILD PREVIEW */}
+          {/* COMPONENT + PREVIEW */}
 
-          <div className="min-w-0 lg:sticky lg:top-5 lg:h-fit">
+          <div className="grid min-w-0 grid-cols-1 gap-0 lg:grid-cols-3">
 
-            <BuildPreview
-              selectedComponents={
-                selectedComponents
-              }
-              onRemove={
-                removeComponent
-              }
-              onResetBuild={
-                resetBuild
-              }
-            />
+            {/* COMPONENT SELECTOR */}
+
+            <div className="min-w-0 border-b border-base-300 p-4 sm:p-5 lg:col-span-2 lg:border-b-0 lg:border-r">
+
+              <ComponentSelector
+                selectedComponents={
+                  selectedComponents
+                }
+                onSelect={
+                  selectProduct
+                }
+              />
+
+            </div>
+
+            {/* BUILD PREVIEW */}
+
+            <div className="min-w-0 bg-base-200/40 p-4 sm:p-5 lg:sticky lg:top-5 lg:h-fit">
+
+              <BuildPreview
+                selectedComponents={
+                  selectedComponents
+                }
+                onRemove={
+                  removeComponent
+                }
+                onResetBuild={
+                  resetBuild
+                }
+              />
+
+            </div>
 
           </div>
 
         </section>
 
-        {/* BUILD SUMMARY */}
+        {/* ====================================================
+            BUILD SUMMARY
+        ==================================================== */}
 
-        <section className="mt-5 min-w-0">
+        <section className="mt-6 min-w-0">
+
+          <div className="mb-3">
+
+            <h2 className="text-sm font-bold sm:text-base">
+              Build Summary
+            </h2>
+
+            <p className="mt-0.5 text-[11px] text-base-content/45 sm:text-xs">
+              Review your selected PC configuration.
+            </p>
+
+          </div>
 
           <BuildSummary
             selectedComponents={
@@ -870,7 +953,8 @@ const CustomBuildPage = () => {
             <div className="p-4 sm:p-5">
 
               <p className="text-sm leading-6 text-base-content/65">
-                Starting a new build will remove the current selections from the builder.
+                Starting a new build will remove the current
+                selections from the builder.
               </p>
 
               {/* CURRENT PROGRESS */}
@@ -905,7 +989,9 @@ const CustomBuildPage = () => {
                 <FaExclamationTriangle className="mt-0.5 shrink-0 text-warning" />
 
                 <p className="text-[11px] leading-5 text-base-content/55">
-                  This action clears the current build from the builder. It will not add the components to your cart.
+                  This action clears the current build from
+                  the builder. It will not add the components
+                  to your cart.
                 </p>
 
               </div>
