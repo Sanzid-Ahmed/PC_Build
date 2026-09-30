@@ -8,6 +8,7 @@ import {
   FaArrowLeft,
   FaExternalLinkAlt,
   FaCheck,
+  FaSpinner,
 } from "react-icons/fa";
 
 import { Link } from "react-router";
@@ -37,6 +38,13 @@ const Cart = () => {
 
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
+  // NEW: checkout loading state
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  // =====================================================
+  // CHECKOUT
+  // =====================================================
+
   const handleCheckout = async () => {
     if (selectedItemCount === 0) {
       return;
@@ -47,27 +55,55 @@ const Cart = () => {
       return;
     }
 
-    const selectedItems = cartItems.filter((item) => item.selected);
+    // Prevent multiple checkout requests
+    if (isCheckingOut) {
+      return;
+    }
+
+    // Get only selected products
+    const selectedItems = cartItems.filter(
+      (item) => item.selected
+    );
 
     const products = selectedItems.map((item) => ({
       product_id: Number(item.id),
+
       product_price:
         Number(item.totalPrice) ||
         Number(item.numericPrice) ||
         Number(item.price) ||
         0,
+
       quantity: Number(item.quantity) || 1,
     }));
 
     try {
+      // Show loading popup immediately
+      setIsCheckingOut(true);
+
+      // Send order to backend
       await api.post("/api/orders/", {
         firebase_id: user.uid,
         products: products,
       });
 
+      // Remove only successfully ordered products
+      selectedItems.forEach((item) => {
+        removeFromCart(item.id);
+      });
+
+      // Stop loading
+      setIsCheckingOut(false);
+
+      // Show success popup
       setShowSuccessPopup(true);
     } catch (error) {
       console.error("Checkout error:", error);
+
+      // Stop loading
+      setIsCheckingOut(false);
+
+      // If order failed, products stay in cart
       alert("Failed to send order. Please try again.");
     }
   };
@@ -154,6 +190,7 @@ const Cart = () => {
   return (
     <main className="min-h-screen bg-base-100 px-3 pb-16 pt-28 sm:px-5 sm:pb-20 sm:pt-32">
       <div className="mx-auto w-full xl:w-10/12">
+
         {/* =====================================================
             HEADER
         ===================================================== */}
@@ -238,7 +275,9 @@ const Cart = () => {
           </label>
 
           <div className="text-sm text-base-content/60">
-            <span className="font-bold text-primary">{selectedItemCount}</span>{" "}
+            <span className="font-bold text-primary">
+              {selectedItemCount}
+            </span>{" "}
             {selectedItemCount === 1 ? "item" : "items"} selected for purchase
           </div>
         </div>
@@ -248,12 +287,15 @@ const Cart = () => {
         ===================================================== */}
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+
           {/* ===================================================
               PRODUCTS
           =================================================== */}
 
           <div className="space-y-4">
+
             {cartItems.map((item) => {
+
               // =================================================
               // IMAGE
               // =================================================
@@ -269,23 +311,30 @@ const Cart = () => {
               }
 
               const image =
-                Array.isArray(images) && images.length > 0 ? images[0] : null;
+                Array.isArray(images) && images.length > 0
+                  ? images[0]
+                  : null;
 
               // =================================================
               // PRICE
               // =================================================
 
               const price =
-                Number(item.numericPrice) || Number(item.price) || 0;
+                Number(item.numericPrice) ||
+                Number(item.price) ||
+                0;
 
               const bottleneckPercentage =
                 Number(item.bottleneck_percentage) || 0;
 
-              const bottleneckAmount = Number(item.bottleneck_amount) || 0;
+              const bottleneckAmount =
+                Number(item.bottleneck_amount) || 0;
 
-              const adjustedPrice = Number(item.totalPrice) || price;
+              const adjustedPrice =
+                Number(item.totalPrice) || price;
 
-              const quantityTotal = adjustedPrice * item.quantity;
+              const quantityTotal =
+                adjustedPrice * item.quantity;
 
               return (
                 <div
@@ -305,14 +354,14 @@ const Cart = () => {
                     }
                   `}
                 >
+
                   {/* =================================================
                       PRODUCT
                   ================================================= */}
 
                   <div className="flex gap-3 p-4 sm:gap-4 sm:p-5">
-                    {/* =================================================
-                        CHECKBOX
-                    ================================================= */}
+
+                    {/* CHECKBOX */}
 
                     <div className="flex shrink-0 items-start pt-1">
                       <input
@@ -324,9 +373,7 @@ const Cart = () => {
                       />
                     </div>
 
-                    {/* =================================================
-                        IMAGE
-                    ================================================= */}
+                    {/* IMAGE */}
 
                     <div
                       className="
@@ -355,15 +402,14 @@ const Cart = () => {
                       )}
                     </div>
 
-                    {/* =================================================
-                        INFORMATION
-                    ================================================= */}
+                    {/* INFORMATION */}
 
                     <div className="min-w-0 flex-1">
-                      {/* PRODUCT TITLE + REMOVE */}
 
                       <div className="flex items-start justify-between gap-3">
+
                         <div className="min-w-0">
+
                           {item.store && (
                             <p className="mb-1 truncate text-xs font-bold text-primary">
                               {item.store}
@@ -380,8 +426,6 @@ const Cart = () => {
                             </p>
                           )}
 
-                          {/* SELECTED STATUS */}
-
                           {item.selected ? (
                             <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
                               <FaCheck className="text-[8px]" />
@@ -392,6 +436,7 @@ const Cart = () => {
                               Saved in cart
                             </p>
                           )}
+
                         </div>
 
                         {/* REMOVE */}
@@ -400,6 +445,7 @@ const Cart = () => {
                           type="button"
                           title="Remove from cart"
                           onClick={() => removeFromCart(item.id)}
+                          disabled={isCheckingOut}
                           className="
                             flex
                             h-9
@@ -413,20 +459,21 @@ const Cart = () => {
                             duration-200
                             hover:bg-error/10
                             hover:text-error
+                            disabled:cursor-not-allowed
+                            disabled:opacity-40
                           "
                         >
                           <FaTrash className="text-sm" />
                         </button>
+
                       </div>
 
-                      {/* =================================================
-                          PRICE + QUANTITY
-                      ================================================= */}
+                      {/* PRICE + QUANTITY */}
 
                       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                        {/* PRICE */}
 
                         <div>
+
                           <p className="text-lg font-extrabold text-primary">
                             ৳ {price.toLocaleString()}
                           </p>
@@ -458,6 +505,7 @@ const Cart = () => {
                               total
                             </p>
                           )}
+
                         </div>
 
                         {/* QUANTITY */}
@@ -473,9 +521,11 @@ const Cart = () => {
                             bg-base-200
                           "
                         >
+
                           <button
                             type="button"
                             onClick={() => decreaseQuantity(item.id)}
+                            disabled={isCheckingOut}
                             className="
                               flex
                               h-9
@@ -486,6 +536,8 @@ const Cart = () => {
                               transition-all
                               hover:bg-base-300
                               hover:text-primary
+                              disabled:cursor-not-allowed
+                              disabled:opacity-40
                             "
                           >
                             <FaMinus className="text-[10px]" />
@@ -513,6 +565,7 @@ const Cart = () => {
                           <button
                             type="button"
                             onClick={() => increaseQuantity(item.id)}
+                            disabled={isCheckingOut}
                             className="
                               flex
                               h-9
@@ -523,18 +576,22 @@ const Cart = () => {
                               transition-all
                               hover:bg-base-300
                               hover:text-primary
+                              disabled:cursor-not-allowed
+                              disabled:opacity-40
                             "
                           >
                             <FaPlus className="text-[10px]" />
                           </button>
+
                         </div>
+
                       </div>
+
                     </div>
+
                   </div>
 
-                  {/* =====================================================
-                      VIEW PRODUCT
-                  ===================================================== */}
+                  {/* VIEW PRODUCT */}
 
                   {item.url && (
                     <div className="border-t border-base-300 px-4 py-3 sm:px-5">
@@ -558,9 +615,11 @@ const Cart = () => {
                       </a>
                     </div>
                   )}
+
                 </div>
               );
             })}
+
           </div>
 
           {/* ===================================================
@@ -568,6 +627,7 @@ const Cart = () => {
           =================================================== */}
 
           <aside className="lg:sticky lg:top-28 lg:h-fit">
+
             <div
               className="
                 rounded-2xl
@@ -579,46 +639,47 @@ const Cart = () => {
                 sm:p-6
               "
             >
+
               <h2 className="text-xl font-extrabold text-base-content">
                 Cart Summary
               </h2>
 
               <div className="my-5 h-px bg-base-300" />
 
-              {/* CART ITEMS */}
-
               <div className="flex items-center justify-between text-sm">
-                <span className="text-base-content/60">Cart Items</span>
+                <span className="text-base-content/60">
+                  Cart Items
+                </span>
 
                 <span className="font-bold text-base-content">
                   {cartItemCount}
                 </span>
               </div>
 
-              {/* SELECTED ITEMS */}
-
               <div className="mt-4 flex items-center justify-between text-sm">
-                <span className="text-base-content/60">Selected Items</span>
+                <span className="text-base-content/60">
+                  Selected Items
+                </span>
 
                 <span className="font-bold text-primary">
                   {selectedItemCount}
                 </span>
               </div>
 
-              {/* SUBTOTAL */}
-
               <div className="mt-4 flex items-center justify-between text-sm">
-                <span className="text-base-content/60">Selected Subtotal</span>
+                <span className="text-base-content/60">
+                  Selected Subtotal
+                </span>
 
                 <span className="font-bold text-base-content">
                   ৳ {cartTotal.toLocaleString()}
                 </span>
               </div>
 
-              {/* SHIPPING */}
-
               <div className="mt-4 flex items-center justify-between gap-4 text-sm">
-                <span className="text-base-content/60">Shipping</span>
+                <span className="text-base-content/60">
+                  Shipping
+                </span>
 
                 <span className="text-right font-semibold text-success">
                   Calculated by store
@@ -626,8 +687,6 @@ const Cart = () => {
               </div>
 
               <div className="my-5 h-px bg-base-300" />
-
-              {/* TOTAL */}
 
               <div className="flex items-center justify-between">
                 <span className="text-base font-bold text-base-content">
@@ -639,12 +698,14 @@ const Cart = () => {
                 </span>
               </div>
 
-              {/* CHECKOUT */}
+              {/* CHECKOUT BUTTON */}
 
               <button
                 type="button"
                 onClick={handleCheckout}
-                disabled={selectedItemCount === 0}
+                disabled={
+                  selectedItemCount === 0 || isCheckingOut
+                }
                 className="
                   mt-6
                   w-full
@@ -661,12 +722,13 @@ const Cart = () => {
                   hover:shadow-md
                   disabled:cursor-not-allowed
                   disabled:opacity-40
-                  hover:cursor-pointer
                 "
               >
-                {selectedItemCount === 0
-                  ? "Select Items to Checkout"
-                  : `Proceed to Checkout (${selectedItemCount})`}
+                {isCheckingOut
+                  ? "Processing..."
+                  : selectedItemCount === 0
+                    ? "Select Items to Checkout"
+                    : `Proceed to Checkout (${selectedItemCount})`}
               </button>
 
               {/* CONTINUE SHOPPING */}
@@ -698,10 +760,117 @@ const Cart = () => {
                 <FaArrowLeft />
                 Continue Shopping
               </Link>
+
             </div>
+
           </aside>
+
         </div>
       </div>
+
+      {/* =====================================================
+          LOADING POPUP
+      ===================================================== */}
+
+      {isCheckingOut && (
+        <div
+          className="
+            fixed
+            inset-0
+            z-[60]
+            flex
+            items-center
+            justify-center
+            bg-black/50
+            px-4
+            backdrop-blur-sm
+          "
+        >
+          <div
+            className="
+              w-full
+              max-w-md
+              rounded-3xl
+              border
+              border-base-300
+              bg-base-100
+              p-6
+              text-center
+              shadow-2xl
+              sm:p-8
+            "
+          >
+
+            {/* SPINNER */}
+
+            <div
+              className="
+                mx-auto
+                flex
+                h-16
+                w-16
+                items-center
+                justify-center
+                rounded-full
+                bg-primary/10
+                text-primary
+              "
+            >
+              <FaSpinner className="animate-spin text-2xl" />
+            </div>
+
+            {/* TITLE */}
+
+            <h2
+              className="
+                mt-5
+                text-2xl
+                font-extrabold
+                text-base-content
+              "
+            >
+              Processing Your Order...
+            </h2>
+
+            {/* DESCRIPTION */}
+
+            <p
+              className="
+                mt-3
+                text-sm
+                leading-6
+                text-base-content/60
+              "
+            >
+              Please wait while we send your selected products.
+              Do not close or refresh this page.
+            </p>
+
+            {/* ACTION */}
+
+            <div
+              className="
+                mt-5
+                rounded-2xl
+                bg-base-200
+                px-4
+                py-3
+                text-sm
+                font-semibold
+                text-base-content/70
+              "
+            >
+              ⏳ Sending your order...
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================
+          SUCCESS POPUP
+      ===================================================== */}
+
       {showSuccessPopup && (
         <div
           className="
@@ -732,6 +901,9 @@ const Cart = () => {
             "
             onClick={(event) => event.stopPropagation()}
           >
+
+            {/* SUCCESS ICON */}
+
             <div
               className="
                 mx-auto
@@ -748,6 +920,8 @@ const Cart = () => {
               <FaCheck className="text-2xl" />
             </div>
 
+            {/* TITLE */}
+
             <h2
               className="
                 mt-5
@@ -758,6 +932,8 @@ const Cart = () => {
             >
               Request Sent Successfully
             </h2>
+
+            {/* DESCRIPTION */}
 
             <p
               className="
@@ -770,6 +946,8 @@ const Cart = () => {
               Your PC build request has been sent successfully. Our admin will
               review your selected components and respond to your request.
             </p>
+
+            {/* ACTION */}
 
             <div
               className="
@@ -785,6 +963,8 @@ const Cart = () => {
             >
               ⏳ Waiting for admin response
             </div>
+
+            {/* OKAY */}
 
             <button
               type="button"
@@ -808,9 +988,11 @@ const Cart = () => {
             >
               Okay
             </button>
+
           </div>
         </div>
       )}
+
     </main>
   );
 };
