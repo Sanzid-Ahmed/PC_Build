@@ -1,4 +1,4 @@
-# 🖥️ ThriftBuild — Frontend
+# 🖥️ PC Build — Frontend
 
 ### Build Smarter. Spend Less.
 
